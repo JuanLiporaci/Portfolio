@@ -30,6 +30,73 @@
       type="font/woff2"
       crossorigin
     />
+    <script>
+      (function () {
+        if (window.matchMedia("(max-width: 768px)").matches) {
+          document.documentElement.classList.add("is-mobile", "mobile-ambient-css");
+        }
+      })();
+    </script>
+    <style>
+      @media (max-width: 768px) {
+        html.is-mobile .site-nav {
+          display: none !important;
+        }
+
+        html.is-mobile .menu-toggle {
+          display: flex !important;
+        }
+
+        html.is-mobile .hero-rail {
+          display: none !important;
+        }
+
+        html.is-mobile .hero {
+          grid-template-columns: 1fr !important;
+          grid-template-rows: auto auto !important;
+          min-height: auto !important;
+        }
+
+        html.is-mobile .hero-intro {
+          grid-row: 1 !important;
+          grid-column: 1 !important;
+          max-width: none !important;
+        }
+
+        html.is-mobile .hero-services {
+          grid-row: 2 !important;
+          grid-column: 1 !important;
+          width: 100% !important;
+        }
+
+        html.is-mobile .hand-right,
+        html.is-mobile .hand-left {
+          display: block !important;
+        }
+
+        html.is-mobile .cloud-c,
+        html.is-mobile .cloud-e,
+        html.is-mobile .cloud-f,
+        html.is-mobile .edge-cloud-right,
+        html.is-mobile .corner-eye--br,
+        html.is-mobile .ambient-video {
+          display: none !important;
+        }
+
+        html.is-mobile.mobile-ambient-css .ambient-deco {
+          opacity: 0.45;
+        }
+
+        html.is-mobile.mobile-ambient-css .corner-eye {
+          opacity: 0.12;
+        }
+
+        html.is-mobile .service-line,
+        html.is-mobile .experience-line {
+          transform: scaleX(1);
+        }
+      }
+    </style>
   </head>
   <body class="is-loading">
     <div id="preloader" aria-hidden="true">
@@ -488,8 +555,12 @@
           </article>
           <article class="work-card" data-project>
             <span class="work-num">05</span>
-            <div class="work-visual">
-              <img src="/assets/eye-halftone.png" alt="" class="work-thumb" />
+            <div class="work-visual work-visual--halftone">
+              <img
+                src="/assets/subastalo.png"
+                alt="Subástalo"
+                class="work-logo work-logo--halftone"
+              />
             </div>
             <h3>Subástalo</h3>
             <p>Hackatón Alegría 2025 · Top 10 national</p>

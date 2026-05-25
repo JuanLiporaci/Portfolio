@@ -313,6 +313,12 @@ main {
   z-index: -1;
 }
 
+.experience.section-panel::before {
+  background: rgba(225, 225, 225, 0.62);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
 .full-bleed {
   position: relative;
   isolation: isolate;
@@ -1056,6 +1062,7 @@ img {
   width: 100%;
   max-width: var(--max);
   margin: 0 auto;
+  overflow: visible;
 }
 
 .section-head {
@@ -1082,30 +1089,69 @@ img {
 
 .work-scroll {
   display: flex;
-  gap: 1px;
+  gap: 0;
   overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-  background: var(--fg);
+  overflow-y: hidden;
+  scroll-snap-type: x proximity;
+  -ms-overflow-style: none;
+  background: var(--bg);
   border: 1px solid var(--fg);
   -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+  overscroll-behavior-x: contain;
+  cursor: grab;
+  width: 100%;
+  max-width: 100%;
+  scroll-padding-left: var(--page-pad);
+  scroll-padding-right: 0;
+}
+
+.work-scroll.is-dragging {
+  cursor: grabbing;
+  scroll-snap-type: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .work-scroll::-webkit-scrollbar {
   display: none;
+  width: 0;
+  height: 0;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+@supports (scrollbar-width: none) {
+  .work-scroll {
+    scrollbar-width: none;
+  }
 }
 
 .work-card {
   flex: 0 0 min(85vw, 340px);
+  flex-shrink: 0;
   scroll-snap-align: start;
   background: var(--bg);
   padding: 1.75rem;
   display: grid;
+  align-content: start;
   gap: 0.75rem;
-  min-height: 380px;
+  min-height: 0;
+  touch-action: pan-x;
+  border-right: 1px solid var(--fg);
   transition:
     background 0.45s var(--ease),
     color 0.45s var(--ease);
+}
+
+.work-card:last-child {
+  border-right: none;
+}
+
+.work-card a,
+.work-card button {
+  touch-action: manipulation;
+  cursor: pointer;
 }
 
 .work-num {
@@ -1143,6 +1189,20 @@ img {
   border: 1px solid rgba(20, 20, 20, 0.15);
 }
 
+.work-visual--halftone {
+  background: var(--bg);
+  border: 1px solid rgba(20, 20, 20, 0.12);
+}
+
+.work-logo--halftone {
+  width: min(78%, 200px);
+  max-height: none;
+  height: auto;
+  object-fit: contain;
+  filter: grayscale(1) contrast(1.1) brightness(0.86);
+  mix-blend-mode: multiply;
+}
+
 .work-logo {
   width: 72%;
   max-height: 96px;
@@ -1161,7 +1221,7 @@ img {
   font-weight: 400;
   font-size: 1.35rem;
   letter-spacing: 0.04em;
-  margin-top: auto;
+  margin-top: 0;
   color: inherit;
   -webkit-font-smoothing: none;
 }
@@ -1426,9 +1486,14 @@ img {
   }
 
   .work-card:hover .work-visual--logo,
-  .work-card:hover .work-visual--logo-light {
+  .work-card:hover .work-visual--logo-light,
+  .work-card:hover .work-visual--halftone {
     background: #050505;
     border-color: rgba(242, 242, 242, 0.12);
+  }
+
+  .work-card:hover .work-logo--halftone {
+    filter: grayscale(1) contrast(1.05) brightness(1.05);
   }
 }
 
@@ -1719,8 +1784,16 @@ img {
 
   .work-card {
     flex: 0 0 min(88vw, 300px);
-    min-height: 340px;
+    min-height: 0;
     padding: 1.35rem;
+  }
+
+  .work-scroll {
+    margin-inline: calc(-1 * var(--page-pad));
+    padding-left: var(--page-pad);
+    padding-right: 0;
+    width: calc(100% + 2 * var(--page-pad));
+    max-width: none;
   }
 
   .work-card h3 {
@@ -1800,16 +1873,16 @@ img {
     background: rgba(225, 225, 225, 0.96);
   }
 
+  .experience.section-panel::before {
+    background: rgba(225, 225, 225, 0.7);
+  }
+
   #ambient-bg.is-ready .ambient-deco {
     opacity: 0.45;
   }
 
   #ambient-bg.is-ready .corner-eye {
     opacity: 0.12;
-  }
-
-  #ambient-bg.is-ready .ambient-video {
-    opacity: 0.45;
   }
 
   .ambient-sky-tint {
@@ -1839,6 +1912,16 @@ img {
     backface-visibility: hidden;
   }
 
+  .work-logo--halftone {
+    mix-blend-mode: normal;
+    filter: grayscale(1) contrast(1.06) brightness(0.9);
+  }
+
+  #ambient-bg {
+    height: 100dvh;
+    height: 100lvh;
+  }
+
   .ambient-deco,
   .corner-eye,
   .edge-cloud,
@@ -1856,35 +1939,28 @@ img {
   }
 
   .ambient-video {
+    display: none;
     opacity: 0;
   }
 
   html.mobile-ambient-css .cloud-a {
-    animation: mobile-cloud-a 22s ease-in-out infinite;
+    animation: mobile-cloud-a 28s ease-in-out infinite;
   }
 
   html.mobile-ambient-css .cloud-b {
-    animation: mobile-cloud-b 26s ease-in-out infinite;
+    animation: mobile-cloud-b 32s ease-in-out infinite;
   }
 
   html.mobile-ambient-css .cloud-d {
-    animation: mobile-cloud-d 24s ease-in-out infinite;
+    animation: mobile-cloud-d 30s ease-in-out infinite;
   }
 
   html.mobile-ambient-css .butterfly {
-    animation: mobile-butterfly 4.5s ease-in-out infinite;
+    animation: mobile-butterfly 6s ease-in-out infinite;
   }
 
   html.mobile-ambient-css .corner-eye--tl {
-    animation: mobile-eye 8s ease-in-out infinite;
-  }
-
-  html.mobile-ambient-css .hand-right {
-    animation: mobile-hand-right 7s ease-in-out infinite;
-  }
-
-  html.mobile-ambient-css .hand-left {
-    animation: mobile-hand-left 7.5s ease-in-out infinite;
+    animation: mobile-eye 10s ease-in-out infinite;
   }
 
   .cloud-c,
@@ -1920,7 +1996,7 @@ img {
   }
 
   50% {
-    transform: translate3d(18px, -9px, 0);
+    transform: translate3d(14px, 0, 0);
   }
 }
 
@@ -1931,7 +2007,7 @@ img {
   }
 
   50% {
-    transform: translate3d(-20px, 10px, 0);
+    transform: translate3d(-16px, 0, 0);
   }
 }
 
@@ -1942,7 +2018,7 @@ img {
   }
 
   50% {
-    transform: translate3d(12px, 8px, 0);
+    transform: translate3d(10px, 0, 0);
   }
 }
 
@@ -1953,7 +2029,7 @@ img {
   }
 
   50% {
-    transform: translate3d(10px, -14px, 0) rotate(6deg);
+    transform: translate3d(8px, 0, 0) rotate(4deg);
   }
 }
 
@@ -1964,29 +2040,7 @@ img {
   }
 
   50% {
-    transform: translate3d(3px, -4px, 0) rotate(-2deg);
-  }
-}
-
-@keyframes mobile-hand-right {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) rotate(0deg);
-  }
-
-  50% {
-    transform: translate3d(5px, -7px, 0) rotate(1.5deg);
-  }
-}
-
-@keyframes mobile-hand-left {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) rotate(0deg);
-  }
-
-  50% {
-    transform: translate3d(-4px, 6px, 0) rotate(-1.5deg);
+    transform: translate3d(2px, 0, 0) rotate(-1deg);
   }
 }
 
@@ -1995,9 +2049,7 @@ img {
   html.mobile-ambient-css .cloud-b,
   html.mobile-ambient-css .cloud-d,
   html.mobile-ambient-css .butterfly,
-  html.mobile-ambient-css .corner-eye--tl,
-  html.mobile-ambient-css .hand-right,
-  html.mobile-ambient-css .hand-left {
+  html.mobile-ambient-css .corner-eye--tl {
     animation: none !important;
   }
 

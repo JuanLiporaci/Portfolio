@@ -46,6 +46,15 @@ function setInitialAnimationStates(): void {
   gsap.set(".corner-eye", { opacity: 0 });
 }
 
+function setMobileInitialAnimationStates(): void {
+  prepareHeroEyebrow();
+
+  gsap.set(".halftone-asset", { opacity: 0 });
+  gsap.set(".hero-eyebrow .line-inner", { y: "110%" });
+  gsap.set(".title-line", { opacity: 0, y: 28 });
+  gsap.set(".hero-desc, .hero-cta", { opacity: 0, y: 20 });
+}
+
 async function initPreloader(): Promise<void> {
   const preloader = document.querySelector<HTMLElement>("#preloader");
   const bar = document.querySelector<HTMLElement>(".preloader-bar span");
@@ -261,24 +270,24 @@ function initAmbientVideo(video: HTMLVideoElement, mobile: boolean): void {
   video.muted = true;
   video.playsInline = true;
 
-  const targetOpacity = mobile ? 0.45 : 0.62;
+  if (mobile) {
+    // Mobile browsers frequently recomposite video layers when scrolling stops.
+    // Keep the animated atmosphere on CSS-only assets instead.
+    video.removeAttribute("autoplay");
+    video.removeAttribute("src");
+    video.load();
+    return;
+  }
+
+  const targetOpacity = 0.62;
 
   const revealVideo = (): void => {
     gsap.to(video, {
       opacity: targetOpacity,
       duration: 1.2,
       ease: "power2.out",
-      delay: mobile ? 0.3 : 0,
     });
   };
-
-  if (mobile) {
-    video.playbackRate = 0.35;
-    revealVideo();
-    void video.play().catch(() => {});
-    initMobileVideoScrollGate(video);
-    return;
-  }
 
   const bindVideoScrub = (): void => {
     if (!video.duration || !Number.isFinite(video.duration)) return;
@@ -315,40 +324,7 @@ function initAmbientVideo(video: HTMLVideoElement, mobile: boolean): void {
 }
 
 function finalizeMobileAmbient(): void {
-  const ambient = document.querySelector<HTMLElement>("#ambient-bg");
-  if (!ambient) return;
-
-  ambient.classList.add("is-ready");
-
-  gsap.set(".ambient-deco, .corner-eye, #sky-video", {
-    clearProps: "all",
-  });
-}
-
-function initMobileVideoScrollGate(video: HTMLVideoElement): void {
-  let idleTimer = 0;
-  let isScrolling = false;
-
-  const resumeVideo = (): void => {
-    if (!isScrolling) {
-      isScrolling = true;
-      void video.play().catch(() => {});
-    }
-  };
-
-  const pauseVideo = (): void => {
-    isScrolling = false;
-    video.pause();
-  };
-
-  const onScroll = (): void => {
-    resumeVideo();
-    window.clearTimeout(idleTimer);
-    idleTimer = window.setTimeout(pauseVideo, 150);
-  };
-
-  window.addEventListener("scroll", onScroll, { passive: true });
-  window.addEventListener("touchmove", onScroll, { passive: true });
+  document.querySelector<HTMLElement>("#ambient-bg")?.classList.add("is-ready");
 }
 
 function initAmbientScene(): void {
@@ -371,28 +347,7 @@ function initAmbientScene(): void {
 
   if (mobile) {
     document.documentElement.classList.add("mobile-ambient-css");
-
-    const fadeTargets = gsap.timeline({
-      delay: 0.35,
-      onComplete: finalizeMobileAmbient,
-    });
-
-    fadeTargets.to(decos, {
-      opacity: decoOpacity,
-      duration: 1,
-      stagger: 0.06,
-      ease: "power2.out",
-    });
-
-    fadeTargets.to(
-      ".corner-eye",
-      {
-        opacity: 0.12,
-        duration: 1,
-        ease: "power2.out",
-      },
-      0.35,
-    );
+    finalizeMobileAmbient();
 
     if (video) {
       initAmbientVideo(video, true);
@@ -508,9 +463,7 @@ function initCornerEyes(): void {
 }
 
 function initSectionEdges(): void {
-  if (prefersReducedMotion()) return;
-
-  const mobile = isMobileViewport();
+  if (prefersReducedMotion() || isMobileViewport()) return;
 
   gsap.utils.toArray<HTMLElement>(".section-cloud").forEach((cloud) => {
     gsap.fromTo(
@@ -550,8 +503,6 @@ function initSectionEdges(): void {
       },
     },
   );
-
-  if (mobile) return;
 
   gsap.to(sectionButterfly, {
     y: -18,
@@ -610,9 +561,11 @@ function initMarquee(): void {
 }
 
 function initExperienceList(): void {
+  const mobile = isMobileViewport();
+
   document.querySelectorAll<HTMLElement>("[data-experience]").forEach((item, i) => {
     const line = item.querySelector<HTMLElement>(".experience-line");
-    if (line) {
+    if (line && !mobile) {
       gsap.to(line, {
         scaleX: 1,
         duration: 0.9,
@@ -625,6 +578,8 @@ function initExperienceList(): void {
         },
       });
     }
+
+    if (mobile) return;
 
     gsap.from(item, {
       y: 36,
@@ -640,21 +595,116 @@ function initExperienceList(): void {
   });
 }
 
-function initScrollReveals(): void {
-  gsap.utils.toArray<HTMLElement>("[data-project]").forEach((card, i) => {
-    gsap.from(card, {
-      x: 48,
-      opacity: 0,
-      duration: 0.85,
-      delay: i * 0.06,
+function initWorkCards(): void {
+  const scroll = document.querySelector<HTMLElement>(".work-scroll");
+  const cards = gsap.utils.toArray<HTMLElement>("[data-project]");
+  if (!scroll || !cards.length) return;
+
+  gsap.set(cards, { opacity: 1, x: 0, clearProps: "transform" });
+
+  if (prefersReducedMotion() || isMobileViewport()) return;
+
+  gsap.fromTo(
+    cards,
+    { opacity: 0, x: 40 },
+    {
+      opacity: 1,
+      x: 0,
+      duration: 0.8,
+      stagger: 0.07,
       ease: "power3.out",
       scrollTrigger: {
-        trigger: card,
-        start: "top 92%",
+        trigger: scroll,
+        start: "top 88%",
         toggleActions: "play none none none",
       },
-    });
+    },
+  );
+}
+
+function getWorkScrollMax(scroll: HTMLElement): number {
+  const lastCard = scroll.querySelector<HTMLElement>(".work-card:last-child");
+  if (!lastCard) return 0;
+
+  const scrollRect = scroll.getBoundingClientRect();
+  const lastRect = lastCard.getBoundingClientRect();
+  return Math.max(0, scroll.scrollLeft + (lastRect.right - scrollRect.right));
+}
+
+function clampWorkScroll(scroll: HTMLElement): void {
+  const max = getWorkScrollMax(scroll);
+  if (scroll.scrollLeft > max) scroll.scrollLeft = max;
+  if (scroll.scrollLeft < 0) scroll.scrollLeft = 0;
+}
+
+function initWorkHorizontalScroll(): void {
+  const workScroll = document.querySelector<HTMLElement>("[data-horizontal-scroll]");
+  if (!workScroll) return;
+
+  const clamp = (): void => clampWorkScroll(workScroll);
+
+  clamp();
+  workScroll.addEventListener("scroll", clamp, { passive: true });
+  window.addEventListener("resize", clamp, { passive: true });
+
+  let isDragging = false;
+  let startX = 0;
+  let scrollStart = 0;
+  let moved = false;
+
+  workScroll.addEventListener(
+    "pointerdown",
+    (event) => {
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+      if ((event.target as HTMLElement).closest("a, button")) return;
+
+      isDragging = true;
+      moved = false;
+      startX = event.clientX;
+      scrollStart = workScroll.scrollLeft;
+      workScroll.setPointerCapture(event.pointerId);
+      workScroll.classList.add("is-dragging");
+    },
+    { passive: true },
+  );
+
+  workScroll.addEventListener(
+    "pointermove",
+    (event) => {
+      if (!isDragging) return;
+
+      const delta = event.clientX - startX;
+      if (Math.abs(delta) > 4) moved = true;
+      if (!moved) return;
+
+      event.preventDefault();
+      const max = getWorkScrollMax(workScroll);
+      workScroll.scrollLeft = Math.min(Math.max(0, scrollStart - delta), max);
+    },
+    { passive: false },
+  );
+
+  const endDrag = (event: PointerEvent): void => {
+    if (!isDragging) return;
+    isDragging = false;
+    clampWorkScroll(workScroll);
+    workScroll.classList.remove("is-dragging");
+
+    if (workScroll.hasPointerCapture(event.pointerId)) {
+      workScroll.releasePointerCapture(event.pointerId);
+    }
+  };
+
+  workScroll.addEventListener("pointerup", endDrag);
+  workScroll.addEventListener("pointercancel", endDrag);
+  workScroll.addEventListener("lostpointercapture", () => {
+    isDragging = false;
+    workScroll.classList.remove("is-dragging");
   });
+}
+
+function initScrollReveals(): void {
+  if (isMobileViewport()) return;
 
   gsap.utils.toArray<HTMLElement>(".section-head").forEach((el) => {
     gsap.from(el.children, {
@@ -742,6 +792,8 @@ async function bootstrap(): Promise<void> {
 
   if (reduced) {
     prepareHeroEyebrow();
+  } else if (mobile) {
+    setMobileInitialAnimationStates();
   } else {
     setInitialAnimationStates();
   }
@@ -767,6 +819,8 @@ async function bootstrap(): Promise<void> {
 
   initServiceList();
   initMarquee();
+  initWorkCards();
+  initWorkHorizontalScroll();
   initExperienceList();
   initScrollReveals();
   initSectionEdges();
