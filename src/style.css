@@ -123,21 +123,41 @@ h3,
 }
 
 .cloud-b {
-  top: 18%;
-  right: -14%;
-  width: min(52vw, 480px);
+  top: 10%;
+  right: -22%;
+  width: min(46vw, 420px);
 }
 
 .cloud-c {
-  top: 52%;
-  left: 2%;
-  width: min(58vw, 520px);
+  top: 38%;
+  left: 0;
+  right: 0;
+  margin-inline: auto;
+  width: min(42vw, 380px);
+}
+
+.cloud-d {
+  top: 22%;
+  left: 28%;
+  width: min(32vw, 280px);
+}
+
+.cloud-e {
+  top: 58%;
+  left: 42%;
+  width: min(28vw, 240px);
+}
+
+.cloud-f {
+  top: 48%;
+  right: 18%;
+  width: min(34vw, 300px);
 }
 
 .butterfly {
-  top: 36%;
-  right: 8%;
-  width: min(24vw, 170px);
+  top: 62%;
+  right: 4%;
+  width: min(22vw, 150px);
 }
 
 .ambient-corners {
@@ -1366,8 +1386,15 @@ img {
   }
 
   .cloud-c,
+  .cloud-e,
+  .cloud-f,
   .edge-cloud-right {
     display: none;
+  }
+
+  .cloud-d {
+    left: 18%;
+    width: min(42vw, 220px);
   }
 
   .butterfly {

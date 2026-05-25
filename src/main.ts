@@ -258,17 +258,41 @@ function initAmbientScene(): void {
     ease: "sine.inOut",
   });
   gsap.to(".cloud-b", {
-    x: -40,
-    y: 22,
+    x: -50,
+    y: 18,
     duration: 20,
     repeat: -1,
     yoyo: true,
     ease: "sine.inOut",
   });
   gsap.to(".cloud-c", {
-    x: 30,
-    y: -28,
+    x: 35,
+    y: -22,
     duration: 18,
+    repeat: -1,
+    yoyo: true,
+    ease: "sine.inOut",
+  });
+  gsap.to(".cloud-d", {
+    x: 28,
+    y: 16,
+    duration: 17,
+    repeat: -1,
+    yoyo: true,
+    ease: "sine.inOut",
+  });
+  gsap.to(".cloud-e", {
+    x: -32,
+    y: -14,
+    duration: 19,
+    repeat: -1,
+    yoyo: true,
+    ease: "sine.inOut",
+  });
+  gsap.to(".cloud-f", {
+    x: 40,
+    y: 20,
+    duration: 21,
     repeat: -1,
     yoyo: true,
     ease: "sine.inOut",
