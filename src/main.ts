@@ -9,18 +9,57 @@ function prefersReducedMotion(): boolean {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-function initPreloader(): Promise<void> {
+function waitForFonts(timeoutMs = 2500): Promise<void> {
+  if (!document.fonts?.ready) return Promise.resolve();
+
+  return Promise.race([
+    document.fonts.ready.then(() => undefined),
+    new Promise<void>((resolve) => {
+      window.setTimeout(resolve, timeoutMs);
+    }),
+  ]);
+}
+
+function prepareHeroEyebrow(): void {
+  const eyebrow = document.querySelector(".hero-eyebrow");
+  if (!eyebrow || eyebrow.querySelector(".line-inner")) return;
+
+  const text = eyebrow.textContent ?? "";
+  eyebrow.textContent = "";
+  const inner = document.createElement("span");
+  inner.className = "line-inner";
+  inner.textContent = text;
+  eyebrow.appendChild(inner);
+}
+
+function setInitialAnimationStates(): void {
+  prepareHeroEyebrow();
+
+  gsap.set(".halftone-asset", { opacity: 0 });
+  gsap.set(".hand-right", { x: 60, y: -40, rotation: 4 });
+  gsap.set(".hand-left", { x: -70, y: 50, rotation: -5 });
+  gsap.set(".vertical-label", { opacity: 0 });
+  gsap.set(".hero-eyebrow .line-inner", { y: "110%" });
+  gsap.set(".title-line", { opacity: 0, y: 28 });
+  gsap.set(".hero-desc, .hero-cta", { opacity: 0, y: 20 });
+  gsap.set(".ambient-deco", { opacity: 0 });
+  gsap.set(".corner-eye", { opacity: 0 });
+}
+
+async function initPreloader(): Promise<void> {
   const preloader = document.querySelector<HTMLElement>("#preloader");
   const bar = document.querySelector<HTMLElement>(".preloader-bar span");
   const count = document.querySelector<HTMLElement>(".preloader-count");
 
+  document.body.classList.add("is-loading");
+
   if (!preloader || !bar || !count || prefersReducedMotion()) {
     preloader?.classList.add("is-done");
     document.body.classList.remove("is-loading");
-    return Promise.resolve();
+    return;
   }
 
-  document.body.classList.add("is-loading");
+  await waitForFonts();
 
   return new Promise((resolve) => {
     const counter = { value: 0 };
@@ -41,8 +80,8 @@ function initPreloader(): Promise<void> {
       onComplete: () => {
         gsap.to(preloader, {
           opacity: 0,
-          duration: 0.5,
-          delay: 0.15,
+          duration: 0.45,
+          delay: 0.1,
           onComplete: () => {
             preloader.classList.add("is-done");
             document.body.classList.remove("is-loading");
@@ -128,17 +167,6 @@ function initMagnetic(): void {
 }
 
 function initHeroAnimations(): void {
-  const eyebrow = document.querySelector(".hero-eyebrow");
-
-  if (eyebrow && !eyebrow.querySelector(".line-inner")) {
-    const text = eyebrow.textContent ?? "";
-    eyebrow.textContent = "";
-    const inner = document.createElement("span");
-    inner.className = "line-inner";
-    inner.textContent = text;
-    eyebrow.appendChild(inner);
-  }
-
   const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
   tl.to(
@@ -147,30 +175,28 @@ function initHeroAnimations(): void {
     0,
   );
 
-  tl.fromTo(
+  tl.to(
     ".hand-right",
-    { x: 60, y: -40, rotation: 4 },
     { x: 0, y: 0, rotation: 0, duration: 1.5 },
     0.1,
   );
 
-  tl.fromTo(
+  tl.to(
     ".hand-left",
-    { x: -70, y: 50, rotation: -5 },
     { x: 0, y: 0, rotation: 0, duration: 1.5 },
     0.1,
   );
 
   tl.to(".vertical-label", { opacity: 1, duration: 0.8 }, 0.35);
   tl.to(".hero-eyebrow .line-inner", { y: 0, duration: 0.85 }, 0.45);
-  tl.from(
+  tl.to(
     ".title-line",
-    { opacity: 0, y: 28, duration: 0.75, stagger: 0.12 },
+    { opacity: 1, y: 0, duration: 0.75, stagger: 0.12 },
     0.5,
   );
-  tl.from(
+  tl.to(
     ".hero-desc, .hero-cta",
-    { opacity: 0, y: 20, duration: 0.7, stagger: 0.1 },
+    { opacity: 1, y: 0, duration: 0.7, stagger: 0.1 },
     0.75,
   );
 
@@ -302,8 +328,18 @@ function initAmbientScene(): void {
   video.muted = true;
   video.playsInline = true;
 
+  const revealVideo = (): void => {
+    gsap.to(video, {
+      opacity: 0.62,
+      duration: 1.2,
+      ease: "power2.out",
+    });
+  };
+
   const bindVideoScrub = (): void => {
     if (!video.duration || !Number.isFinite(video.duration)) return;
+
+    video.currentTime = 0;
 
     ScrollTrigger.create({
       trigger: "main",
@@ -320,14 +356,18 @@ function initAmbientScene(): void {
   };
 
   if (video.readyState >= 1) {
+    revealVideo();
     bindVideoScrub();
   } else {
-    video.addEventListener("loadedmetadata", bindVideoScrub, { once: true });
+    video.addEventListener(
+      "loadedmetadata",
+      () => {
+        revealVideo();
+        bindVideoScrub();
+      },
+      { once: true },
+    );
   }
-
-  video.addEventListener("loadeddata", () => {
-    video.currentTime = 0;
-  });
 }
 
 function initCornerEyes(): void {
@@ -599,12 +639,33 @@ function closeMobileMenu(): void {
 }
 
 async function bootstrap(): Promise<void> {
+  const reduced = prefersReducedMotion();
+
+  if (reduced) {
+    prepareHeroEyebrow();
+  } else {
+    setInitialAnimationStates();
+  }
+
   await initPreloader();
-  initSmoothScroll();
+
+  const lenis = initSmoothScroll();
+  lenis?.scrollTo(0, { immediate: true });
+
   initCursor();
   initMagnetic();
   initAmbientScene();
-  initHeroAnimations();
+
+  if (reduced) {
+    gsap.set(
+      ".title-line, .hero-desc, .hero-cta, .halftone-asset, .vertical-label, .ambient-deco, .corner-eye",
+      { clearProps: "all" },
+    );
+    gsap.set("#sky-video", { opacity: 0.62 });
+  } else {
+    initHeroAnimations();
+  }
+
   initServiceList();
   initMarquee();
   initExperienceList();
@@ -612,6 +673,9 @@ async function bootstrap(): Promise<void> {
   initSectionEdges();
   initStats();
   initNav();
+
+  ScrollTrigger.refresh();
+  requestAnimationFrame(() => ScrollTrigger.refresh());
 }
 
 if (document.readyState === "loading") {
