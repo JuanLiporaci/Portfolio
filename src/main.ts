@@ -166,28 +166,31 @@ function initMagnetic(): void {
   });
 }
 
+function isMobileViewport(): boolean {
+  return window.matchMedia("(max-width: 768px)").matches;
+}
+
 function initHeroAnimations(): void {
+  const mobile = isMobileViewport();
   const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-  tl.to(
-    ".halftone-asset",
-    { opacity: 1, duration: 1.2, stagger: 0.15 },
-    0,
-  );
+  if (mobile) {
+    gsap.set(".hand-right, .hand-left", { display: "none" });
+  } else {
+    tl.to(".halftone-asset", { opacity: 1, duration: 1.2, stagger: 0.15 }, 0);
+    tl.to(
+      ".hand-right",
+      { x: 0, y: 0, rotation: 0, duration: 1.5 },
+      0.1,
+    );
+    tl.to(
+      ".hand-left",
+      { x: 0, y: 0, rotation: 0, duration: 1.5 },
+      0.1,
+    );
+  }
 
-  tl.to(
-    ".hand-right",
-    { x: 0, y: 0, rotation: 0, duration: 1.5 },
-    0.1,
-  );
-
-  tl.to(
-    ".hand-left",
-    { x: 0, y: 0, rotation: 0, duration: 1.5 },
-    0.1,
-  );
-
-  tl.to(".vertical-label", { opacity: 1, duration: 0.8 }, 0.35);
+  tl.to(".vertical-label", { opacity: 1, duration: 0.8 }, mobile ? 0 : 0.35);
   tl.to(".hero-eyebrow .line-inner", { y: 0, duration: 0.85 }, 0.45);
   tl.to(
     ".title-line",
@@ -200,7 +203,7 @@ function initHeroAnimations(): void {
     0.75,
   );
 
-  if (!prefersReducedMotion()) {
+  if (!prefersReducedMotion() && !isMobileViewport()) {
     gsap.to(".hand-right", {
       y: -30,
       x: 12,
