@@ -1705,11 +1705,14 @@ img {
   }
 
   .hero-cta {
+    display: block;
+    margin-inline: auto;
     font-size: 0.8rem;
     padding: 1rem 1.5rem;
     width: 100%;
     max-width: 20rem;
     text-align: center;
+    box-sizing: border-box;
   }
 
   .hero-services {
@@ -1786,6 +1789,7 @@ img {
     flex: 0 0 min(88vw, 300px);
     min-height: 0;
     padding: 1.35rem;
+    touch-action: manipulation;
   }
 
   .work-scroll {
@@ -1794,6 +1798,8 @@ img {
     padding-right: 0;
     width: calc(100% + 2 * var(--page-pad));
     max-width: none;
+    touch-action: manipulation;
+    cursor: auto;
   }
 
   .work-card h3 {

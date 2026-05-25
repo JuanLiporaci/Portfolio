@@ -655,7 +655,8 @@ function initWorkHorizontalScroll(): void {
   workScroll.addEventListener(
     "pointerdown",
     (event) => {
-      if (event.pointerType === "mouse" && event.button !== 0) return;
+      if (event.pointerType !== "mouse") return;
+      if (event.button !== 0) return;
       if ((event.target as HTMLElement).closest("a, button")) return;
 
       isDragging = true;
