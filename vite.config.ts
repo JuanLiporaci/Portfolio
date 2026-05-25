@@ -10,4 +10,14 @@ export default defineConfig({
     host: true,
     port: 4173,
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          gsap: ["gsap", "gsap/ScrollTrigger"],
+          lenis: ["lenis"],
+        },
+      },
+    },
+  },
 });

@@ -50,15 +50,21 @@ function setMobileInitialAnimationStates(): void {
   prepareHeroEyebrow();
 
   gsap.set(".halftone-asset", { opacity: 0 });
+  gsap.set(".hand-right", { x: 40, y: -30, rotation: 3 });
+  gsap.set(".hand-left", { x: -50, y: 35, rotation: -4 });
+  gsap.set(".vertical-label", { opacity: 0 });
   gsap.set(".hero-eyebrow .line-inner", { y: "110%" });
   gsap.set(".title-line", { opacity: 0, y: 28 });
   gsap.set(".hero-desc, .hero-cta", { opacity: 0, y: 20 });
+  gsap.set(".ambient-deco", { opacity: 0 });
+  gsap.set(".corner-eye", { opacity: 0 });
 }
 
 async function initPreloader(): Promise<void> {
   const preloader = document.querySelector<HTMLElement>("#preloader");
   const bar = document.querySelector<HTMLElement>(".preloader-bar span");
   const count = document.querySelector<HTMLElement>(".preloader-count");
+  const mobile = isMobileViewport();
 
   document.body.classList.add("is-loading");
 
@@ -68,14 +74,15 @@ async function initPreloader(): Promise<void> {
     return;
   }
 
-  await waitForFonts();
+  await waitForFonts(mobile ? 1200 : 2500);
 
+  const animDuration = mobile ? 0.85 : 1.4;
   return new Promise((resolve) => {
     const counter = { value: 0 };
 
     gsap.to(counter, {
       value: 100,
-      duration: 1.4,
+      duration: animDuration,
       ease: "power2.inOut",
       onUpdate: () => {
         count.textContent = String(Math.round(counter.value));
@@ -84,7 +91,7 @@ async function initPreloader(): Promise<void> {
 
     gsap.to(bar, {
       width: "100%",
-      duration: 1.4,
+      duration: animDuration,
       ease: "power2.inOut",
       onComplete: () => {
         gsap.to(preloader, {
@@ -184,7 +191,12 @@ function initHeroAnimations(): void {
   const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
   if (mobile) {
+    gsap.set(".hand-right", { x: 40, y: -30, rotation: 3 });
+    gsap.set(".hand-left", { x: -50, y: 35, rotation: -4 });
+
     tl.to(".halftone-asset", { opacity: 1, duration: 1.2, stagger: 0.15 }, 0);
+    tl.to(".hand-right", { x: 0, y: 0, rotation: 0, duration: 1.3 }, 0.1);
+    tl.to(".hand-left", { x: 0, y: 0, rotation: 0, duration: 1.3 }, 0.1);
   } else {
     gsap.set(".hand-right", { x: 60, y: -40, rotation: 4 });
     gsap.set(".hand-left", { x: -70, y: 50, rotation: -5 });
@@ -271,13 +283,18 @@ function initAmbientVideo(video: HTMLVideoElement, mobile: boolean): void {
   video.playsInline = true;
 
   if (mobile) {
-    // Mobile browsers frequently recomposite video layers when scrolling stops.
-    // Keep the animated atmosphere on CSS-only assets instead.
-    video.removeAttribute("autoplay");
     video.removeAttribute("src");
     video.load();
     return;
   }
+
+  const src = video.dataset.desktopSrc ?? "/assets/sky-video.mp4";
+  const source = video.querySelector<HTMLSourceElement>("source");
+
+  if (source) source.src = src;
+  else video.src = src;
+
+  video.load();
 
   const targetOpacity = 0.62;
 
@@ -347,12 +364,21 @@ function initAmbientScene(): void {
 
   if (mobile) {
     document.documentElement.classList.add("mobile-ambient-css");
-    finalizeMobileAmbient();
+
+    gsap.to(decos, {
+      opacity: decoOpacity,
+      duration: 1.1,
+      stagger: 0.07,
+      delay: 0.25,
+      ease: "power2.out",
+      onComplete: finalizeMobileAmbient,
+    });
 
     if (video) {
       initAmbientVideo(video, true);
     }
 
+    initCornerEyes();
     return;
   }
 
@@ -428,27 +454,28 @@ function initCornerEyes(): void {
     return;
   }
 
-  if (isMobileViewport()) {
-    return;
-  }
+  const mobile = isMobileViewport();
+  const targetOpacity = mobile ? 0.12 : 0.14;
 
   gsap.to(eyes, {
-    opacity: 0.14,
+    opacity: targetOpacity,
     duration: 1.4,
     stagger: 0.2,
-    delay: 1.2,
+    delay: mobile ? 0.5 : 1.2,
     ease: "power2.out",
   });
 
   gsap.to(".corner-eye--tl", {
-    y: -6,
-    x: 4,
-    rotation: -4,
-    duration: 5,
+    y: mobile ? -3 : -6,
+    x: mobile ? 2 : 4,
+    rotation: mobile ? -2 : -4,
+    duration: mobile ? 7 : 5,
     repeat: -1,
     yoyo: true,
     ease: "sine.inOut",
   });
+
+  if (mobile) return;
 
   gsap.to(".corner-eye--br", {
     y: 8,
@@ -463,16 +490,18 @@ function initCornerEyes(): void {
 }
 
 function initSectionEdges(): void {
-  if (prefersReducedMotion() || isMobileViewport()) return;
+  if (prefersReducedMotion()) return;
+
+  const mobile = isMobileViewport();
 
   gsap.utils.toArray<HTMLElement>(".section-cloud").forEach((cloud) => {
     gsap.fromTo(
       cloud,
-      { x: -30, opacity: 0.15 },
+      { x: mobile ? -18 : -30, opacity: 0.15 },
       {
-        x: 20,
-        opacity: 0.45,
-        duration: 1.2,
+        x: mobile ? 10 : 20,
+        opacity: mobile ? 0.4 : 0.45,
+        duration: mobile ? 0.95 : 1.2,
         ease: "power3.out",
         scrollTrigger: {
           trigger: cloud.closest("section") ?? cloud,
@@ -488,13 +517,13 @@ function initSectionEdges(): void {
 
   gsap.fromTo(
     sectionButterfly,
-    { x: 40, y: -20, rotation: -12, opacity: 0 },
+    { x: mobile ? 24 : 40, y: -14, rotation: -8, opacity: 0 },
     {
       x: 0,
       y: 0,
       rotation: 0,
-      opacity: 0.45,
-      duration: 1.4,
+      opacity: mobile ? 0.4 : 0.45,
+      duration: mobile ? 1.1 : 1.4,
       ease: "power3.out",
       scrollTrigger: {
         trigger: sectionButterfly.closest("section") ?? sectionButterfly,
@@ -505,9 +534,9 @@ function initSectionEdges(): void {
   );
 
   gsap.to(sectionButterfly, {
-    y: -18,
-    rotation: 8,
-    duration: 2.5,
+    y: mobile ? -10 : -18,
+    rotation: mobile ? 5 : 8,
+    duration: mobile ? 2.8 : 2.5,
     repeat: -1,
     yoyo: true,
     ease: "sine.inOut",
@@ -565,26 +594,24 @@ function initExperienceList(): void {
 
   document.querySelectorAll<HTMLElement>("[data-experience]").forEach((item, i) => {
     const line = item.querySelector<HTMLElement>(".experience-line");
-    if (line && !mobile) {
+    if (line) {
       gsap.to(line, {
         scaleX: 1,
-        duration: 0.9,
+        duration: mobile ? 0.75 : 0.9,
         ease: "power3.inOut",
-        delay: i * 0.08,
+        delay: mobile ? 0 : i * 0.08,
         scrollTrigger: {
           trigger: item,
-          start: "top 85%",
+          start: "top 88%",
           toggleActions: "play none none none",
         },
       });
     }
 
-    if (mobile) return;
-
     gsap.from(item, {
-      y: 36,
+      y: mobile ? 22 : 36,
       opacity: 0,
-      duration: 0.75,
+      duration: mobile ? 0.65 : 0.75,
       ease: "power3.out",
       scrollTrigger: {
         trigger: item,
@@ -598,25 +625,26 @@ function initExperienceList(): void {
 function initWorkCards(): void {
   const scroll = document.querySelector<HTMLElement>(".work-scroll");
   const cards = gsap.utils.toArray<HTMLElement>("[data-project]");
-  if (!scroll || !cards.length) return;
+  if (!scroll || !cards.length || prefersReducedMotion()) return;
+
+  const mobile = isMobileViewport();
 
   gsap.set(cards, { opacity: 1, x: 0, clearProps: "transform" });
 
-  if (prefersReducedMotion() || isMobileViewport()) return;
-
   gsap.fromTo(
     cards,
-    { opacity: 0, x: 40 },
+    { opacity: 0, x: mobile ? 24 : 40 },
     {
       opacity: 1,
       x: 0,
-      duration: 0.8,
-      stagger: 0.07,
+      duration: mobile ? 0.65 : 0.8,
+      stagger: mobile ? 0.05 : 0.07,
       ease: "power3.out",
       scrollTrigger: {
         trigger: scroll,
         start: "top 88%",
         toggleActions: "play none none none",
+        once: true,
       },
     },
   );
@@ -705,13 +733,15 @@ function initWorkHorizontalScroll(): void {
 }
 
 function initScrollReveals(): void {
-  if (isMobileViewport()) return;
+  if (prefersReducedMotion()) return;
+
+  const mobile = isMobileViewport();
 
   gsap.utils.toArray<HTMLElement>(".section-head").forEach((el) => {
     gsap.from(el.children, {
-      y: 32,
+      y: mobile ? 22 : 32,
       opacity: 0,
-      duration: 0.8,
+      duration: mobile ? 0.65 : 0.8,
       stagger: 0.08,
       ease: "power3.out",
       scrollTrigger: {
@@ -828,10 +858,8 @@ async function bootstrap(): Promise<void> {
   initStats();
   initNav();
 
-  if (!mobile) {
-    ScrollTrigger.refresh();
-    requestAnimationFrame(() => ScrollTrigger.refresh());
-  }
+  ScrollTrigger.refresh();
+  requestAnimationFrame(() => ScrollTrigger.refresh());
 }
 
 if (document.readyState === "loading") {

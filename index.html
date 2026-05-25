@@ -90,11 +90,6 @@
         html.is-mobile.mobile-ambient-css .corner-eye {
           opacity: 0.12;
         }
-
-        html.is-mobile .service-line,
-        html.is-mobile .experience-line {
-          transform: scaleX(1);
-        }
       }
     </style>
   </head>
@@ -118,10 +113,11 @@
           class="ambient-video"
           muted
           playsinline
-          preload="auto"
+          preload="none"
           tabindex="-1"
+          data-desktop-src="/assets/sky-video.mp4"
         >
-          <source src="/assets/sky-video.mp4" type="video/mp4" />
+          <source type="video/mp4" />
         </video>
         <div class="ambient-sky-tint"></div>
       </div>
@@ -153,6 +149,7 @@
           width="560"
           height="340"
           decoding="async"
+          loading="lazy"
         />
         <img
           src="/assets/cloud-1.png"
@@ -162,6 +159,7 @@
           width="400"
           height="260"
           decoding="async"
+          loading="lazy"
         />
         <img
           src="/assets/cloud-2.png"
@@ -171,6 +169,7 @@
           width="360"
           height="220"
           decoding="async"
+          loading="lazy"
         />
         <img
           src="/assets/cloud-3.png"
@@ -180,6 +179,7 @@
           width="420"
           height="260"
           decoding="async"
+          loading="lazy"
         />
         <img
           src="/assets/butterfly.png"
@@ -208,12 +208,13 @@
           width="100"
           height="100"
           decoding="async"
+          loading="lazy"
         />
       </div>
 
       <div class="ambient-edge ambient-edge--top" aria-hidden="true">
-        <img src="/assets/cloud-2.png" alt="" class="edge-cloud edge-cloud-left" />
-        <img src="/assets/cloud-1.png" alt="" class="edge-cloud edge-cloud-right" />
+        <img src="/assets/cloud-2.png" alt="" class="edge-cloud edge-cloud-left" loading="lazy" decoding="async" />
+        <img src="/assets/cloud-1.png" alt="" class="edge-cloud edge-cloud-right" loading="lazy" decoding="async" />
       </div>
     </div>
 
@@ -257,6 +258,8 @@
             width="640"
             height="640"
             decoding="async"
+            fetchpriority="high"
+            loading="eager"
           />
           <img
             src="/assets/hand-left.png"
@@ -265,6 +268,8 @@
             width="480"
             height="480"
             decoding="async"
+            fetchpriority="high"
+            loading="eager"
           />
         </div>
 
@@ -461,7 +466,7 @@
 
       <section id="work" class="work section-panel" aria-labelledby="work-title">
         <div class="section-edge-deco" aria-hidden="true">
-          <img src="/assets/cloud-3.png" alt="" class="section-cloud section-cloud--tl" />
+          <img src="/assets/cloud-3.png" alt="" class="section-cloud section-cloud--tl" loading="lazy" decoding="async" />
         </div>
         <div class="section-head">
           <h2 id="work-title" class="section-tag">Selected Work</h2>
@@ -510,6 +515,8 @@
                 src="/assets/ice-cars-logo.png"
                 alt="ICE Cars logo"
                 class="work-logo"
+                loading="lazy"
+                decoding="async"
               />
             </div>
             <h3>ICE Cars</h3>
@@ -560,6 +567,8 @@
                 src="/assets/subastalo.png"
                 alt="Subástalo"
                 class="work-logo work-logo--halftone"
+                loading="lazy"
+                decoding="async"
               />
             </div>
             <h3>Subástalo</h3>
@@ -578,7 +587,7 @@
         aria-labelledby="exp-title"
       >
         <div class="section-edge-deco" aria-hidden="true">
-          <img src="/assets/butterfly.png" alt="" class="section-butterfly" />
+          <img src="/assets/butterfly.png" alt="" class="section-butterfly" loading="lazy" decoding="async" />
         </div>
         <div class="section-head">
           <h2 id="exp-title" class="section-tag">Experience</h2>
@@ -671,7 +680,7 @@
 
       <section id="contact" class="contact section-panel" aria-labelledby="contact-title">
         <div class="section-edge-deco" aria-hidden="true">
-          <img src="/assets/cloud-1.png" alt="" class="section-cloud section-cloud--br" />
+          <img src="/assets/cloud-1.png" alt="" class="section-cloud section-cloud--br" loading="lazy" decoding="async" />
         </div>
         <p class="contact-eyebrow">Available for new projects</p>
         <h2 id="contact-title">Let's talk.</h2>

@@ -1923,6 +1923,15 @@ img {
     filter: grayscale(1) contrast(1.06) brightness(0.9);
   }
 
+  .marquee-section,
+  .work,
+  .experience,
+  .stats,
+  .contact {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 480px;
+  }
+
   #ambient-bg {
     height: 100dvh;
     height: 100lvh;
