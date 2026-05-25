@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Juan Liporaci — Full-Stack & Mobile Developer. React Native, Node.js, AI automation."
+    />
+    <title>Juan Liporaci — NULL POINTERS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,400&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="preloader" aria-hidden="true">
+      <div class="preloader-inner">
+        <span class="preloader-logo">NULL POINTERS</span>
+        <div class="preloader-bar"><span></span></div>
+        <span class="preloader-count">0</span>
+      </div>
+    </div>
+
+    <div id="grain" aria-hidden="true"></div>
+    <div id="cursor-dot" aria-hidden="true"></div>
+    <div id="cursor-ring" aria-hidden="true"></div>
+
+    <div id="ambient-bg" aria-hidden="true">
+      <div class="ambient-sky">
+        <video
+          id="sky-video"
+          class="ambient-video"
+          muted
+          playsinline
+          preload="auto"
+          tabindex="-1"
+        >
+          <source src="/assets/sky-video.mp4" type="video/mp4" />
+        </video>
+        <div class="ambient-sky-tint"></div>
+      </div>
+
+      <div class="ambient-deco-layer">
+        <img
+          src="/assets/cloud-1.png"
+          alt=""
+          class="ambient-deco cloud cloud-a"
+          data-depth="0.15"
+          width="520"
+          height="320"
+          decoding="async"
+        />
+        <img
+          src="/assets/cloud-2.png"
+          alt=""
+          class="ambient-deco cloud cloud-b"
+          data-depth="0.28"
+          width="480"
+          height="300"
+          decoding="async"
+        />
+        <img
+          src="/assets/cloud-3.png"
+          alt=""
+          class="ambient-deco cloud cloud-c"
+          data-depth="0.42"
+          width="560"
+          height="340"
+          decoding="async"
+        />
+        <img
+          src="/assets/butterfly.png"
+          alt=""
+          class="ambient-deco butterfly"
+          data-depth="0.55"
+          width="200"
+          height="200"
+          decoding="async"
+        />
+      </div>
+
+      <div class="ambient-corners" aria-hidden="true">
+        <img
+          src="/assets/eye-halftone.png"
+          alt=""
+          class="corner-eye corner-eye--tl"
+          width="120"
+          height="120"
+          decoding="async"
+        />
+        <img
+          src="/assets/eye-halftone.png"
+          alt=""
+          class="corner-eye corner-eye--br"
+          width="100"
+          height="100"
+          decoding="async"
+        />
+      </div>
+
+      <div class="ambient-edge ambient-edge--top" aria-hidden="true">
+        <img src="/assets/cloud-2.png" alt="" class="edge-cloud edge-cloud-left" />
+        <img src="/assets/cloud-1.png" alt="" class="edge-cloud edge-cloud-right" />
+      </div>
+    </div>
+
+    <header class="site-header">
+      <div class="brand" data-animate="fade">
+        <a href="#" class="logo-block">NULL POINTERS</a>
+        <span class="brand-handle">@JUAN.LIPORACI</span>
+      </div>
+      <nav class="site-nav" aria-label="Main">
+        <a href="#services">Services</a>
+        <a href="#work">Work</a>
+        <a href="#experience">Experience</a>
+        <a href="#contact" class="nav-cta">Contact</a>
+      </nav>
+      <button
+        type="button"
+        class="menu-toggle"
+        aria-label="Open menu"
+        aria-expanded="false"
+      >
+        <span></span><span></span>
+      </button>
+    </header>
+
+    <div class="mobile-drawer" hidden>
+      <nav aria-label="Mobile">
+        <a href="#services">Services</a>
+        <a href="#work">Work</a>
+        <a href="#experience">Experience</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </div>
+
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-stage">
+          <img
+            src="/assets/hand-right.png"
+            alt=""
+            class="halftone-asset hand-right"
+            width="640"
+            height="640"
+            decoding="async"
+          />
+          <img
+            src="/assets/hand-left.png"
+            alt=""
+            class="halftone-asset hand-left"
+            width="480"
+            height="480"
+            decoding="async"
+          />
+        </div>
+
+        <aside class="hero-rail" aria-hidden="true">
+          <span class="vertical-label">Our Services</span>
+        </aside>
+
+        <div class="hero-services" id="services">
+          <ul class="service-list" role="list">
+            <li class="service-row" data-service>
+              <div class="service-line"></div>
+              <button
+                type="button"
+                class="service-trigger"
+                aria-expanded="false"
+                aria-controls="svc-1"
+              >
+                <span class="service-name">App development</span>
+                <span class="service-icon" aria-hidden="true">+</span>
+              </button>
+              <div id="svc-1" class="service-panel" hidden>
+                <p>
+                  React Native &amp; Expo apps from architecture to App Store
+                  and Google Play. UI/UX, APIs, payments, and production ops.
+                </p>
+              </div>
+            </li>
+            <li class="service-row" data-service>
+              <div class="service-line"></div>
+              <button
+                type="button"
+                class="service-trigger"
+                aria-expanded="false"
+                aria-controls="svc-2"
+              >
+                <span class="service-name">Landing page</span>
+                <span class="service-icon" aria-hidden="true">+</span>
+              </button>
+              <div id="svc-2" class="service-panel" hidden>
+                <p>
+                  High-impact one-pagers with motion, SEO, and conversion
+                  focus. Built for launches and personal brands.
+                </p>
+              </div>
+            </li>
+            <li class="service-row" data-service>
+              <div class="service-line"></div>
+              <button
+                type="button"
+                class="service-trigger"
+                aria-expanded="false"
+                aria-controls="svc-3"
+              >
+                <span class="service-name">Web app</span>
+                <span class="service-icon" aria-hidden="true">+</span>
+              </button>
+              <div id="svc-3" class="service-panel" hidden>
+                <p>
+                  React apps with dashboards, auth, APIs, and production
+                  deployment. Custom scope per client.
+                </p>
+              </div>
+            </li>
+            <li class="service-row" data-service>
+              <div class="service-line"></div>
+              <button
+                type="button"
+                class="service-trigger"
+                aria-expanded="false"
+                aria-controls="svc-4"
+              >
+                <span class="service-name">Marketplace</span>
+                <span class="service-icon" aria-hidden="true">+</span>
+              </button>
+              <div id="svc-4" class="service-panel" hidden>
+                <p>
+                  Multi-vendor platforms with payments, catalog, and admin
+                  panels. Live experience with Tigritos on App Store &amp; Play.
+                </p>
+              </div>
+            </li>
+            <li class="service-row" data-service>
+              <div class="service-line"></div>
+              <button
+                type="button"
+                class="service-trigger"
+                aria-expanded="false"
+                aria-controls="svc-5"
+              >
+                <span class="service-name">AI automation</span>
+                <span class="service-icon" aria-hidden="true">+</span>
+              </button>
+              <div id="svc-5" class="service-panel" hidden>
+                <p>
+                  Make/n8n bots, QBO &amp; Sheets integrations, Telegram
+                  workflows, and team-specific GPT assistants.
+                </p>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="hero-intro">
+          <p class="hero-eyebrow">Systems Engineer · Caracas, VE</p>
+          <h1 id="hero-title">
+            <span class="title-line">I build digital</span>
+            <span class="title-line">products end</span>
+            <span class="title-line">to end.</span>
+          </h1>
+          <p class="hero-desc">
+            CEO at Tigritos. Full-Stack mobile &amp; web. 5K+ live users, 7K+
+            followers. Top 10 at Hackatón Alegría 2025.
+          </p>
+          <a
+            href="https://wa.me/584141809040"
+            class="hero-cta magnetic"
+            data-magnetic
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Start a project
+          </a>
+        </div>
+      </section>
+
+      <section class="marquee-section" aria-label="Tech stack">
+        <div class="marquee" data-marquee>
+          <div class="marquee-inner">
+            <div class="marquee-track">
+              <span class="marquee-item">
+                <img src="https://svgl.app/library/react_light.svg" alt="React" width="28" height="28" />
+                React
+              </span>
+              <span class="marquee-item">
+                <img src="https://svgl.app/library/expo.svg" alt="Expo" width="28" height="28" />
+                React Native
+              </span>
+              <span class="marquee-item">
+                <img src="https://svgl.app/library/nodejs.svg" alt="Node.js" width="28" height="28" />
+                Node.js
+              </span>
+              <span class="marquee-item">
+                <img src="https://svgl.app/library/typescript.svg" alt="TypeScript" width="28" height="28" />
+                TypeScript
+              </span>
+              <span class="marquee-item">
+                <img src="https://svgl.app/library/firebase.svg" alt="Firebase" width="28" height="28" />
+                Firebase
+              </span>
+              <span class="marquee-item">Make</span>
+              <span class="marquee-item">n8n</span>
+              <span class="marquee-item">DigitalOcean</span>
+              <span class="marquee-item">GSAP</span>
+            </div>
+            <div class="marquee-track" aria-hidden="true">
+              <span class="marquee-item">
+                <img src="https://svgl.app/library/react_light.svg" alt="" width="28" height="28" />
+                React
+              </span>
+              <span class="marquee-item">
+                <img src="https://svgl.app/library/expo.svg" alt="" width="28" height="28" />
+                React Native
+              </span>
+              <span class="marquee-item">
+                <img src="https://svgl.app/library/nodejs.svg" alt="" width="28" height="28" />
+                Node.js
+              </span>
+              <span class="marquee-item">
+                <img src="https://svgl.app/library/typescript.svg" alt="" width="28" height="28" />
+                TypeScript
+              </span>
+              <span class="marquee-item">
+                <img src="https://svgl.app/library/firebase.svg" alt="" width="28" height="28" />
+                Firebase
+              </span>
+              <span class="marquee-item">Make</span>
+              <span class="marquee-item">n8n</span>
+              <span class="marquee-item">DigitalOcean</span>
+              <span class="marquee-item">GSAP</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="work" class="work section-panel" aria-labelledby="work-title">
+        <div class="section-edge-deco" aria-hidden="true">
+          <img src="/assets/cloud-3.png" alt="" class="section-cloud section-cloud--tl" />
+        </div>
+        <div class="section-head">
+          <h2 id="work-title" class="section-tag">Selected Work</h2>
+          <p class="section-sub">Live products in production</p>
+        </div>
+        <div class="work-scroll" data-horizontal-scroll>
+          <article class="work-card" data-project>
+            <span class="work-num">01</span>
+            <div class="work-visual work-visual--logo work-visual--logo-light">
+              <img
+                src="/assets/tigritos-logo.png"
+                alt="Tigritos logo"
+                class="work-logo"
+              />
+            </div>
+            <h3>Tigritos</h3>
+            <p>React Native · Expo · Node.js · Custom payments</p>
+            <ul class="work-tags">
+              <li>App Store</li>
+              <li>Google Play</li>
+              <li>5K+ users</li>
+            </ul>
+            <div class="work-links">
+              <a
+                href="https://play.google.com/store/apps/details?id=com.tigritos.app&hl=es&pli=1"
+                class="work-link"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Google Play
+              </a>
+              <a
+                href="https://apps.apple.com/ve/app/tigritos/id6756139037"
+                class="work-link"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                App Store
+              </a>
+            </div>
+          </article>
+          <article class="work-card" data-project>
+            <span class="work-num">02</span>
+            <div class="work-visual work-visual--logo work-visual--logo-light">
+              <img
+                src="/assets/ice-cars-logo.png"
+                alt="ICE Cars logo"
+                class="work-logo"
+              />
+            </div>
+            <h3>ICE Cars</h3>
+            <p>E-commerce · Multi-site inventory · VES/USD rate APIs</p>
+            <ul class="work-tags">
+              <li>Admin panel</li>
+              <li>Profit reports</li>
+              <li>Shop</li>
+            </ul>
+            <a
+              href="https://www.icecars.store/shop"
+              class="work-link"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Visit shop
+            </a>
+          </article>
+          <article class="work-card" data-project>
+            <span class="work-num">03</span>
+            <div class="work-visual work-visual--plain">
+              <img src="https://svgl.app/library/nodejs.svg" alt="" width="48" height="48" />
+            </div>
+            <h3>Chirinos Auto</h3>
+            <p>Sales system · Make · n8n · QuickBooks</p>
+            <ul class="work-tags">
+              <li>KPIs</li>
+              <li>Automation</li>
+              <li>GPT</li>
+            </ul>
+          </article>
+          <article class="work-card" data-project>
+            <span class="work-num">04</span>
+            <div class="work-visual work-visual--plain">
+              <img src="https://svgl.app/library/react_light.svg" alt="" width="48" height="48" />
+            </div>
+            <h3>Rectificadora Retoica</h3>
+            <p>React · Real-time operations management</p>
+            <ul class="work-tags">
+              <li>Dashboard</li>
+              <li>Clients</li>
+            </ul>
+          </article>
+          <article class="work-card" data-project>
+            <span class="work-num">05</span>
+            <div class="work-visual">
+              <img src="/assets/eye-halftone.png" alt="" class="work-thumb" />
+            </div>
+            <h3>Subástalo</h3>
+            <p>Hackatón Alegría 2025 · Top 10 national</p>
+            <ul class="work-tags">
+              <li>72 hours</li>
+              <li>Firebase</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section
+        id="experience"
+        class="experience section-panel"
+        aria-labelledby="exp-title"
+      >
+        <div class="section-edge-deco" aria-hidden="true">
+          <img src="/assets/butterfly.png" alt="" class="section-butterfly" />
+        </div>
+        <div class="section-head">
+          <h2 id="exp-title" class="section-tag">Experience</h2>
+        </div>
+        <ol class="experience-list">
+          <li class="experience-item" data-experience>
+            <div class="experience-line"></div>
+            <div class="experience-head">
+              <h3>CEO &amp; Full-Stack Mobile Developer</h3>
+              <span class="experience-org">Tigritos</span>
+              <time class="experience-when">2026 — Present</time>
+            </div>
+            <p>
+              End-to-end product: App Store &amp; Play, Express API, custom
+              payments, DigitalOcean. 5K+ users, 7K+ organic Instagram
+              followers.
+            </p>
+          </li>
+          <li class="experience-item" data-experience>
+            <div class="experience-line"></div>
+            <div class="experience-head">
+              <h3>Full-Stack Developer</h3>
+              <span class="experience-org">ICE Cars</span>
+              <time class="experience-when">2025 — Present</time>
+            </div>
+            <p>
+              E-commerce, landing, and admin system: multi-site inventory,
+              profit reports, and Venezuela USD exchange rate APIs.
+            </p>
+          </li>
+          <li class="experience-item" data-experience>
+            <div class="experience-line"></div>
+            <div class="experience-head">
+              <h3>Full-Stack Developer</h3>
+              <span class="experience-org">Chirinos Auto · Texas</span>
+              <time class="experience-when">2025 — Present</time>
+            </div>
+            <p>
+              Custom sales system, Make/n8n bots, QuickBooks, Google Sheets,
+              Telegram, and GPT assistants per team.
+            </p>
+          </li>
+          <li class="experience-item" data-experience>
+            <div class="experience-line"></div>
+            <div class="experience-head">
+              <h3>Founder &amp; General Manager</h3>
+              <span class="experience-org">Koi Digital Agency</span>
+              <time class="experience-when">2019 — Present</time>
+            </div>
+            <p>
+              5+ years leading digital strategy and creative/technical teams
+              across multiple industries.
+            </p>
+          </li>
+        </ol>
+      </section>
+
+      <section class="stats full-bleed" aria-label="Metrics">
+        <div class="stats-inner">
+          <div class="stat" data-stat>
+            <span class="stat-value" data-count="5000">0</span>
+            <span class="stat-label">Tigritos users</span>
+          </div>
+          <div class="stat" data-stat>
+            <span class="stat-value" data-count="7000">0</span>
+            <span class="stat-label">Instagram followers</span>
+          </div>
+          <div class="stat" data-stat>
+            <span class="stat-value" data-count="10">0</span>
+            <span class="stat-label">Hackathon top 10</span>
+          </div>
+          <div class="stat" data-stat>
+            <span class="stat-value" data-count="1500">0</span>
+            <span class="stat-label">Hackathon entrants beaten</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="contact" class="contact section-panel" aria-labelledby="contact-title">
+        <div class="section-edge-deco" aria-hidden="true">
+          <img src="/assets/cloud-1.png" alt="" class="section-cloud section-cloud--br" />
+        </div>
+        <p class="contact-eyebrow">Available for new projects</p>
+        <h2 id="contact-title">Let's talk.</h2>
+        <a
+          href="https://wa.me/584141809040"
+          class="contact-cta magnetic"
+          data-magnetic
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Message on WhatsApp
+        </a>
+        <p class="contact-alt">
+          <a href="mailto:juanandresliporaci@hotmail.com">juanandresliporaci@hotmail.com</a>
+        </p>
+        <div class="contact-social">
+          <a
+            href="https://www.linkedin.com/in/juan-liporaci-6610bb169/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            LinkedIn
+          </a>
+          <a
+            href="https://github.com/JuanLiporaci"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            GitHub
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer full-bleed">
+      <span>© 2026 Juan Liporaci</span>
+      <span class="footer-handle">@JUAN.LIPORACI</span>
+      <span>UNIMET · Systems Engineering</span>
+    </footer>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
