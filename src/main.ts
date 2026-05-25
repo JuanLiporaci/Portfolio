@@ -94,7 +94,7 @@ async function initPreloader(): Promise<void> {
 }
 
 function initSmoothScroll(): Lenis | null {
-  if (prefersReducedMotion()) return null;
+  if (prefersReducedMotion() || isMobileViewport()) return null;
 
   const lenis = new Lenis({
     duration: 1.15,
@@ -175,19 +175,14 @@ function initHeroAnimations(): void {
   const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
   if (mobile) {
-    gsap.set(".hand-right, .hand-left", { display: "none" });
-  } else {
     tl.to(".halftone-asset", { opacity: 1, duration: 1.2, stagger: 0.15 }, 0);
-    tl.to(
-      ".hand-right",
-      { x: 0, y: 0, rotation: 0, duration: 1.5 },
-      0.1,
-    );
-    tl.to(
-      ".hand-left",
-      { x: 0, y: 0, rotation: 0, duration: 1.5 },
-      0.1,
-    );
+  } else {
+    gsap.set(".hand-right", { x: 60, y: -40, rotation: 4 });
+    gsap.set(".hand-left", { x: -70, y: 50, rotation: -5 });
+
+    tl.to(".halftone-asset", { opacity: 1, duration: 1.2, stagger: 0.15 }, 0);
+    tl.to(".hand-right", { x: 0, y: 0, rotation: 0, duration: 1.5 }, 0.1);
+    tl.to(".hand-left", { x: 0, y: 0, rotation: 0, duration: 1.5 }, 0.1);
   }
 
   tl.to(".vertical-label", { opacity: 1, duration: 0.8 }, mobile ? 0 : 0.35);
@@ -203,7 +198,7 @@ function initHeroAnimations(): void {
     0.75,
   );
 
-  if (!prefersReducedMotion() && !isMobileViewport()) {
+  if (!prefersReducedMotion() && !mobile) {
     gsap.to(".hand-right", {
       y: -30,
       x: 12,
@@ -229,10 +224,138 @@ function initHeroAnimations(): void {
   }
 }
 
+function initCloudDrift(mobile: boolean): void {
+  const amp = mobile ? 0.6 : 1;
+  const dur = mobile ? 1.2 : 1;
+
+  const drifts: Array<{
+    target: string;
+    x: number;
+    y: number;
+    duration: number;
+    delay?: number;
+  }> = [
+    { target: ".cloud-a", x: 45, y: -18, duration: 16 },
+    { target: ".cloud-b", x: -50, y: 18, duration: 20 },
+    { target: ".cloud-c", x: 35, y: -22, duration: 18 },
+    { target: ".cloud-d", x: 28, y: 16, duration: 17 },
+    { target: ".cloud-e", x: -32, y: -14, duration: 19 },
+    { target: ".cloud-f", x: 40, y: 20, duration: 21 },
+  ];
+
+  drifts.forEach(({ target, x, y, duration, delay = 0 }) => {
+    gsap.to(target, {
+      x: x * amp,
+      y: y * amp,
+      duration: duration * dur,
+      repeat: -1,
+      yoyo: true,
+      ease: "sine.inOut",
+      delay,
+    });
+  });
+}
+
+function initAmbientVideo(video: HTMLVideoElement, mobile: boolean): void {
+  video.pause();
+  video.muted = true;
+  video.playsInline = true;
+
+  const targetOpacity = mobile ? 0.45 : 0.62;
+
+  const revealVideo = (): void => {
+    gsap.to(video, {
+      opacity: targetOpacity,
+      duration: 1.2,
+      ease: "power2.out",
+      delay: mobile ? 0.3 : 0,
+    });
+  };
+
+  if (mobile) {
+    video.playbackRate = 0.35;
+    revealVideo();
+    void video.play().catch(() => {});
+    initMobileVideoScrollGate(video);
+    return;
+  }
+
+  const bindVideoScrub = (): void => {
+    if (!video.duration || !Number.isFinite(video.duration)) return;
+
+    video.currentTime = 0;
+
+    ScrollTrigger.create({
+      trigger: "main",
+      start: "top top",
+      end: "bottom bottom",
+      scrub: 0.65,
+      onUpdate: (self) => {
+        video.currentTime = Math.min(
+          self.progress * video.duration,
+          video.duration - 0.08,
+        );
+      },
+    });
+  };
+
+  if (video.readyState >= 1) {
+    revealVideo();
+    bindVideoScrub();
+  } else {
+    video.addEventListener(
+      "loadedmetadata",
+      () => {
+        revealVideo();
+        bindVideoScrub();
+      },
+      { once: true },
+    );
+  }
+}
+
+function finalizeMobileAmbient(): void {
+  const ambient = document.querySelector<HTMLElement>("#ambient-bg");
+  if (!ambient) return;
+
+  ambient.classList.add("is-ready");
+
+  gsap.set(".ambient-deco, .corner-eye, #sky-video", {
+    clearProps: "all",
+  });
+}
+
+function initMobileVideoScrollGate(video: HTMLVideoElement): void {
+  let idleTimer = 0;
+  let isScrolling = false;
+
+  const resumeVideo = (): void => {
+    if (!isScrolling) {
+      isScrolling = true;
+      void video.play().catch(() => {});
+    }
+  };
+
+  const pauseVideo = (): void => {
+    isScrolling = false;
+    video.pause();
+  };
+
+  const onScroll = (): void => {
+    resumeVideo();
+    window.clearTimeout(idleTimer);
+    idleTimer = window.setTimeout(pauseVideo, 150);
+  };
+
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("touchmove", onScroll, { passive: true });
+}
+
 function initAmbientScene(): void {
   const video = document.querySelector<HTMLVideoElement>("#sky-video");
   const decos = document.querySelectorAll<HTMLElement>(".ambient-deco");
   const reduced = prefersReducedMotion();
+  const mobile = isMobileViewport();
 
   if (reduced) {
     gsap.set(decos, { opacity: 0.4 });
@@ -244,62 +367,49 @@ function initAmbientScene(): void {
     return;
   }
 
+  const decoOpacity = mobile ? 0.45 : 0.72;
+
+  if (mobile) {
+    document.documentElement.classList.add("mobile-ambient-css");
+
+    const fadeTargets = gsap.timeline({
+      delay: 0.35,
+      onComplete: finalizeMobileAmbient,
+    });
+
+    fadeTargets.to(decos, {
+      opacity: decoOpacity,
+      duration: 1,
+      stagger: 0.06,
+      ease: "power2.out",
+    });
+
+    fadeTargets.to(
+      ".corner-eye",
+      {
+        opacity: 0.12,
+        duration: 1,
+        ease: "power2.out",
+      },
+      0.35,
+    );
+
+    if (video) {
+      initAmbientVideo(video, true);
+    }
+
+    return;
+  }
+
   gsap.to(decos, {
-    opacity: 0.72,
+    opacity: decoOpacity,
     duration: 1.8,
     stagger: 0.1,
     delay: 0.6,
     ease: "power2.out",
   });
 
-  gsap.to(".cloud-a", {
-    x: 45,
-    y: -18,
-    duration: 16,
-    repeat: -1,
-    yoyo: true,
-    ease: "sine.inOut",
-  });
-  gsap.to(".cloud-b", {
-    x: -50,
-    y: 18,
-    duration: 20,
-    repeat: -1,
-    yoyo: true,
-    ease: "sine.inOut",
-  });
-  gsap.to(".cloud-c", {
-    x: 35,
-    y: -22,
-    duration: 18,
-    repeat: -1,
-    yoyo: true,
-    ease: "sine.inOut",
-  });
-  gsap.to(".cloud-d", {
-    x: 28,
-    y: 16,
-    duration: 17,
-    repeat: -1,
-    yoyo: true,
-    ease: "sine.inOut",
-  });
-  gsap.to(".cloud-e", {
-    x: -32,
-    y: -14,
-    duration: 19,
-    repeat: -1,
-    yoyo: true,
-    ease: "sine.inOut",
-  });
-  gsap.to(".cloud-f", {
-    x: 40,
-    y: 20,
-    duration: 21,
-    repeat: -1,
-    yoyo: true,
-    ease: "sine.inOut",
-  });
+  initCloudDrift(false);
 
   gsap.to(".butterfly", {
     y: -35,
@@ -349,51 +459,8 @@ function initAmbientScene(): void {
 
   initCornerEyes();
 
-  if (!video) return;
-
-  video.pause();
-  video.muted = true;
-  video.playsInline = true;
-
-  const revealVideo = (): void => {
-    gsap.to(video, {
-      opacity: 0.62,
-      duration: 1.2,
-      ease: "power2.out",
-    });
-  };
-
-  const bindVideoScrub = (): void => {
-    if (!video.duration || !Number.isFinite(video.duration)) return;
-
-    video.currentTime = 0;
-
-    ScrollTrigger.create({
-      trigger: "main",
-      start: "top top",
-      end: "bottom bottom",
-      scrub: 0.65,
-      onUpdate: (self) => {
-        video.currentTime = Math.min(
-          self.progress * video.duration,
-          video.duration - 0.08,
-        );
-      },
-    });
-  };
-
-  if (video.readyState >= 1) {
-    revealVideo();
-    bindVideoScrub();
-  } else {
-    video.addEventListener(
-      "loadedmetadata",
-      () => {
-        revealVideo();
-        bindVideoScrub();
-      },
-      { once: true },
-    );
+  if (video) {
+    initAmbientVideo(video, false);
   }
 }
 
@@ -403,6 +470,10 @@ function initCornerEyes(): void {
 
   if (prefersReducedMotion()) {
     gsap.set(eyes, { opacity: 0.12 });
+    return;
+  }
+
+  if (isMobileViewport()) {
     return;
   }
 
@@ -439,6 +510,8 @@ function initCornerEyes(): void {
 function initSectionEdges(): void {
   if (prefersReducedMotion()) return;
 
+  const mobile = isMobileViewport();
+
   gsap.utils.toArray<HTMLElement>(".section-cloud").forEach((cloud) => {
     gsap.fromTo(
       cloud,
@@ -458,34 +531,36 @@ function initSectionEdges(): void {
   });
 
   const sectionButterfly = document.querySelector<HTMLElement>(".section-butterfly");
-  if (sectionButterfly) {
-    gsap.fromTo(
-      sectionButterfly,
-      { x: 40, y: -20, rotation: -12, opacity: 0 },
-      {
-        x: 0,
-        y: 0,
-        rotation: 0,
-        opacity: 0.45,
-        duration: 1.4,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: sectionButterfly.closest("section") ?? sectionButterfly,
-          start: "top 85%",
-          toggleActions: "play none none reverse",
-        },
-      },
-    );
+  if (!sectionButterfly) return;
 
-    gsap.to(sectionButterfly, {
-      y: -18,
-      rotation: 8,
-      duration: 2.5,
-      repeat: -1,
-      yoyo: true,
-      ease: "sine.inOut",
-    });
-  }
+  gsap.fromTo(
+    sectionButterfly,
+    { x: 40, y: -20, rotation: -12, opacity: 0 },
+    {
+      x: 0,
+      y: 0,
+      rotation: 0,
+      opacity: 0.45,
+      duration: 1.4,
+      ease: "power3.out",
+      scrollTrigger: {
+        trigger: sectionButterfly.closest("section") ?? sectionButterfly,
+        start: "top 85%",
+        toggleActions: "play none none reverse",
+      },
+    },
+  );
+
+  if (mobile) return;
+
+  gsap.to(sectionButterfly, {
+    y: -18,
+    rotation: 8,
+    duration: 2.5,
+    repeat: -1,
+    yoyo: true,
+    ease: "sine.inOut",
+  });
 }
 
 function initServiceList(): void {
@@ -506,27 +581,16 @@ function initServiceList(): void {
     if (!trigger || !panel) return;
 
     trigger.addEventListener("click", () => {
-      const isActive = row.classList.toggle("is-active");
-      trigger.setAttribute("aria-expanded", String(isActive));
-      panel.hidden = !isActive;
+      const willOpen = !row.classList.contains("is-active");
 
-      if (isActive) {
-        gsap.fromTo(
-          panel,
-          { height: 0, opacity: 0 },
-          { height: "auto", opacity: 1, duration: 0.4, ease: "power2.out" },
-        );
-      } else {
-        gsap.to(panel, {
-          height: 0,
-          opacity: 0,
-          duration: 0.3,
-          ease: "power2.in",
-          onComplete: () => {
-            panel.style.height = "";
-          },
-        });
-      }
+      document.querySelectorAll<HTMLElement>("[data-service].is-active").forEach((openRow) => {
+        if (openRow === row) return;
+        openRow.classList.remove("is-active");
+        openRow.querySelector(".service-trigger")?.setAttribute("aria-expanded", "false");
+      });
+
+      row.classList.toggle("is-active", willOpen);
+      trigger.setAttribute("aria-expanded", String(willOpen));
     });
   });
 }
@@ -667,6 +731,14 @@ function closeMobileMenu(): void {
 
 async function bootstrap(): Promise<void> {
   const reduced = prefersReducedMotion();
+  const mobile = isMobileViewport();
+
+  if (mobile) {
+    ScrollTrigger.config({
+      ignoreMobileResize: true,
+      limitCallbacks: true,
+    });
+  }
 
   if (reduced) {
     prepareHeroEyebrow();
@@ -701,8 +773,10 @@ async function bootstrap(): Promise<void> {
   initStats();
   initNav();
 
-  ScrollTrigger.refresh();
-  requestAnimationFrame(() => ScrollTrigger.refresh());
+  if (!mobile) {
+    ScrollTrigger.refresh();
+    requestAnimationFrame(() => ScrollTrigger.refresh());
+  }
 }
 
 if (document.readyState === "loading") {
