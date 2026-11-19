@@ -12,6 +12,11 @@ const saveData =
 const easeOutExpo = (t: number): number => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
 const easeInOut = (t: number): number => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
+/* Heavy decorative media (sky video, drifting clouds) waits until the curtain is up,
+   so on a slow first visit the fonts and hero images get the bandwidth. */
+let introDone: () => void = () => {};
+const afterIntro = new Promise<void>((r) => (introDone = r));
+
 function session(key: string, value?: string): string | null {
   try {
     if (value !== undefined) sessionStorage.setItem(key, value);
@@ -59,32 +64,49 @@ function runPreloader(): Promise<void> {
             document.fonts.load('800 80px "Archivo"'),
             document.fonts.load('400 16px "Archivo"'),
             document.fonts.load('400 13px "Commit Mono"'),
+            document.fonts.load('700 13px "Commit Mono"'),
           ]).then(() => document.fonts.ready)
         : Promise.resolve(),
+      // the hero art must be decoded before the curtain lifts, or it pops in afterwards
+      ...[...document.querySelectorAll<HTMLImageElement>(".hero img")].map((img) =>
+        img.decode().catch(() => undefined),
+      ),
       new Promise<void>((r) => {
         const img = new Image();
         img.onload = img.onerror = () => r();
         img.src = "/img/sky-poster.webp";
       }),
     ]),
-    new Promise((r) => setTimeout(r, 2500)),
+    // safety net only: on a very slow line it is better to wait than to re-render in front of the visitor
+    new Promise((r) => setTimeout(r, 8000)),
   ]);
 
+  let loaded = false;
+  void ready.then(() => (loaded = true));
+
+  // Phase 1 runs 0 → 95 over `duration`. It holds at 95 while fonts/images are still
+  // arriving (slow first visit), then phase 2 runs 95 → 100 and the curtain lifts.
   return new Promise((resolve) => {
     const start = performance.now();
-    const tick = (now: number): void => {
-      const t = Math.min(1, (now - start) / duration);
-      const p = easeInOut(t);
+    let finishAt = 0;
+    const show = (p: number): void => {
       count.textContent = String(Math.round(p * 100));
       bar.style.setProperty("--p", String(p));
-      if (t < 1) requestAnimationFrame(tick);
-      else
-        void ready.then(() => {
-          pl.classList.add("is-done");
-          document.body.classList.remove("is-loading");
-          setTimeout(resolve, 380);
-          setTimeout(() => pl.remove(), 1000);
-        });
+    };
+    const tick = (now: number): void => {
+      const t = Math.min(1, (now - start) / duration);
+      if (t < 1 || !loaded) {
+        show(0.95 * easeInOut(t));
+        return void requestAnimationFrame(tick);
+      }
+      finishAt ||= now;
+      const f = Math.min(1, (now - finishAt) / 220);
+      show(0.95 + 0.05 * easeInOut(f));
+      if (f < 1) return void requestAnimationFrame(tick);
+      pl.classList.add("is-done");
+      document.body.classList.remove("is-loading");
+      setTimeout(resolve, 380);
+      setTimeout(() => pl.remove(), 1000);
     };
     requestAnimationFrame(tick);
   });
@@ -295,8 +317,10 @@ function initSky(): void {
       else void video.play().catch(() => {});
     });
   };
-  if ("requestIdleCallback" in window) requestIdleCallback(start, { timeout: 1500 });
-  else setTimeout(start, 600);
+  void afterIntro.then(() => {
+    if ("requestIdleCallback" in window) requestIdleCallback(start, { timeout: 1500 });
+    else setTimeout(start, 600);
+  });
 }
 
 /* Halftone clouds drift at different depths as you scroll and wrap around off-screen.
@@ -313,8 +337,10 @@ function initClouds(): void {
       img.onload = () => img.classList.add("is-loaded");
       img.src = img.dataset.src ?? "";
     });
-  if ("requestIdleCallback" in window) requestIdleCallback(load, { timeout: 2000 });
-  else setTimeout(load, 800);
+  void afterIntro.then(() => {
+    if ("requestIdleCallback" in window) requestIdleCallback(load, { timeout: 2000 });
+    else setTimeout(load, 800);
+  });
 
   let ticking = false;
   const update = (): void => {
@@ -494,6 +520,7 @@ async function boot(): Promise<void> {
   initClouds();
 
   await runPreloader();
+  introDone();
 
   hero?.classList.add("intro");
   hero?.classList.remove("is-pending");
