@@ -1720,3 +1720,16 @@ details[open] .svc-icon {
     box-shadow: 0 0 0 12px rgb(31 138 76 / 0);
   }
 }
+
+/* Hero waits in its "before" state while the loader is up, so nothing shows and then re-animates */
+.hero.is-pending .status,
+.hero.is-pending .hero-lede,
+.hero.is-pending .hero-actions,
+.hero.is-pending .hero-facts,
+.hero.is-pending .hand,
+.hero.is-pending .butterfly {
+  opacity: 0;
+}
+.butterfly {
+  transition: opacity 900ms var(--ease-out) 700ms;
+}

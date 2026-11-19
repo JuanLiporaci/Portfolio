@@ -54,7 +54,13 @@ function runPreloader(): Promise<void> {
 
   const ready = Promise.race([
     Promise.all([
-      document.fonts?.ready ?? Promise.resolve(),
+      document.fonts
+        ? Promise.all([
+            document.fonts.load('800 80px "Archivo"'),
+            document.fonts.load('400 16px "Archivo"'),
+            document.fonts.load('400 13px "Commit Mono"'),
+          ]).then(() => document.fonts.ready)
+        : Promise.resolve(),
       new Promise<void>((r) => {
         const img = new Image();
         img.onload = img.onerror = () => r();
@@ -203,6 +209,7 @@ function initCounters(): void {
   );
   els.forEach((el) => {
     el.style.fontVariantNumeric = "tabular-nums";
+    if (!reduced) el.textContent = `${el.dataset.prefix ?? ""}0${el.dataset.suffix ?? ""}`;
     io.observe(el);
   });
 }
@@ -475,6 +482,8 @@ function initCopyEmail(): void {
 async function boot(): Promise<void> {
   const title = document.querySelector<HTMLElement>(".hero-title");
   if (title && !reduced) splitWords(title);
+  const hero = document.querySelector<HTMLElement>(".hero");
+  if (!reduced) hero?.classList.add("is-pending");
 
   initCursor();
   initMenu();
@@ -486,7 +495,8 @@ async function boot(): Promise<void> {
 
   await runPreloader();
 
-  document.querySelector(".hero")?.classList.add("intro");
+  hero?.classList.add("intro");
+  hero?.classList.remove("is-pending");
   initReveals();
   initCounters();
   initWordLight();
