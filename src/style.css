@@ -1401,7 +1401,7 @@ details[open] .svc-icon {
     z-index: 300;
     pointer-events: none;
     border-radius: 50%;
-    will-change: transform;
+    will-change: translate;
   }
   .cursor-dot {
     width: 6px;
@@ -1697,5 +1697,26 @@ details[open] .svc-icon {
 @media (prefers-reduced-motion: reduce) {
   .drift-img {
     animation: none;
+  }
+}
+
+/* Copied feedback: a short pulse confirms success */
+[data-copy-email].is-copied {
+  animation: copied-pulse 600ms var(--ease-out);
+}
+.btn--ghost.is-copied {
+  border-color: var(--live);
+  color: var(--live);
+}
+.socials a.is-copied {
+  color: var(--live);
+  border-color: var(--live);
+}
+@keyframes copied-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgb(31 138 76 / 0.35);
+  }
+  100% {
+    box-shadow: 0 0 0 12px rgb(31 138 76 / 0);
   }
 }

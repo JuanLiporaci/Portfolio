@@ -103,8 +103,8 @@ function initCursor(): void {
   const loop = (): void => {
     rx += (mx - rx) * 0.18;
     ry += (my - ry) * 0.18;
-    dot.style.transform = `translate3d(${mx}px, ${my}px, 0)`;
-    ring.style.transform = `translate3d(${rx}px, ${ry}px, 0)`;
+    dot.style.translate = `${mx}px ${my}px`;
+    ring.style.translate = `${rx}px ${ry}px`;
     if (Math.abs(mx - rx) > 0.1 || Math.abs(my - ry) > 0.1) requestAnimationFrame(loop);
     else running = false;
   };
@@ -434,12 +434,51 @@ function initFilters(): void {
   document.fonts?.ready.then(() => movePill(current()));
 }
 
+/* Email links: copy the address (many PCs have no mail app, so mailto does nothing)
+   and still let mailto open a mail app when there is one. */
+function initCopyEmail(): void {
+  document.querySelectorAll<HTMLAnchorElement>("[data-copy-email]").forEach((a) => {
+    const label = a.querySelector<HTMLElement>("[data-copy-label]");
+    const original = label?.textContent ?? "";
+    let timer = 0;
+    a.addEventListener("click", () => {
+      const email = a.dataset.copyEmail ?? "";
+      const done = (): void => {
+        if (label) label.textContent = "Email copied ✓";
+        a.classList.remove("is-copied");
+        void a.offsetWidth;
+        a.classList.add("is-copied");
+        clearTimeout(timer);
+        timer = window.setTimeout(() => {
+          if (label) label.textContent = original;
+          a.classList.remove("is-copied");
+        }, 2200);
+      };
+      if (navigator.clipboard?.writeText) navigator.clipboard.writeText(email).then(done, done);
+      else {
+        const t = document.createElement("textarea");
+        t.value = email;
+        document.body.append(t);
+        t.select();
+        try {
+          document.execCommand("copy");
+        } catch {
+          /* ignore */
+        }
+        t.remove();
+        done();
+      }
+    });
+  });
+}
+
 async function boot(): Promise<void> {
   const title = document.querySelector<HTMLElement>(".hero-title");
   if (title && !reduced) splitWords(title);
 
   initCursor();
   initMenu();
+  initCopyEmail();
   initHeader();
   initFilters();
   initSky();
