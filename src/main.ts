@@ -260,30 +260,70 @@ function initWordLight(): void {
   );
 }
 
-/* Sky video: load after first paint, play only while the hero is visible. */
+/* Sky video behind the whole page: loads after first paint, pauses when the tab is hidden. */
 function initSky(): void {
   const video = document.querySelector<HTMLVideoElement>(".sky-video");
-  const hero = document.querySelector<HTMLElement>(".hero");
-  if (!video || !hero || reduced || saveData) return;
+  if (!video || reduced || saveData) return;
   const src = mobile ? video.dataset.srcMobile : video.dataset.srcDesktop;
   if (!src) return;
-
   const start = (): void => {
     video.src = src;
     video.addEventListener("playing", () => video.classList.add("is-playing"), { once: true });
-    new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !document.hidden) void video.play().catch(() => {});
-        else video.pause();
-      },
-      { threshold: 0.05 },
-    ).observe(hero);
+    void video.play().catch(() => {});
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) video.pause();
+      else void video.play().catch(() => {});
     });
   };
   if ("requestIdleCallback" in window) requestIdleCallback(start, { timeout: 1500 });
   else setTimeout(start, 600);
+}
+
+/* Halftone clouds drift at different depths as you scroll and wrap around off-screen.
+   One rAF per scroll, transform only. A light wash keeps text readable below the hero. */
+function initClouds(): void {
+  const sky = document.querySelector<HTMLElement>(".page-sky");
+  const drifts = [...document.querySelectorAll<HTMLElement>(".drift")];
+  if (!sky) return;
+
+  const load = (): void =>
+    drifts.forEach((d) => {
+      const img = d.querySelector<HTMLImageElement>("img[data-src]");
+      if (!img) return;
+      img.onload = () => img.classList.add("is-loaded");
+      img.src = img.dataset.src ?? "";
+    });
+  if ("requestIdleCallback" in window) requestIdleCallback(load, { timeout: 2000 });
+  else setTimeout(load, 800);
+
+  let ticking = false;
+  const update = (): void => {
+    ticking = false;
+    const vh = innerHeight;
+    const y = scrollY;
+    sky.style.setProperty("--wash", String(Math.min(0.42, (y / vh) * 0.42)));
+    if (reduced) return;
+    drifts.forEach((d) => {
+      const depth = Number(d.dataset.depth ?? 0.4);
+      const top = Number(d.dataset.top ?? 0.5) * vh;
+      const h = d.offsetHeight || 300;
+      const span = vh + h * 2;
+      const pos = ((((top - y * depth) % span) + span) % span) - h;
+      d.style.transform = `translate3d(0, ${pos.toFixed(1)}px, 0)`;
+    });
+  };
+  update();
+  addEventListener(
+    "scroll",
+    () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(update);
+    },
+    { passive: true },
+  );
+  addEventListener("resize", update, { passive: true });
+  drifts.forEach((d) => d.querySelector("img")?.addEventListener("load", update, { once: true }));
 }
 
 /* Hands drift with scroll: transform only, one rAF, only while the hero is on screen. */
@@ -390,6 +430,7 @@ async function boot(): Promise<void> {
   initHeader();
   initFilters();
   initSky();
+  initClouds();
 
   await runPreloader();
 

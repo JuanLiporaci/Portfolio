@@ -41,6 +41,24 @@
       <div class="cursor-ring"><span class="cursor-label"></span></div>
       <div class="cursor-dot"></div>
     </div>
+    <div class="page-sky" aria-hidden="true">
+      <video
+        class="sky-video"
+        muted
+        loop
+        playsinline
+        preload="none"
+        poster="/img/sky-poster.webp"
+        data-src-desktop="/media/sky-1280.mp4"
+        data-src-mobile="/media/sky-720.mp4"
+        tabindex="-1"
+      ></video>
+      <div class="sky-wash"></div>
+      <div class="drift" data-depth="0.35" data-top="0.18"><img data-src="/img/cloud-1.webp" alt="" width="720" height="647" class="drift-img drift-img--a" /></div>
+      <div class="drift" data-depth="0.6" data-top="0.62"><img data-src="/img/cloud-2.webp" alt="" width="720" height="362" class="drift-img drift-img--b" /></div>
+      <div class="drift" data-depth="0.45" data-top="1.05"><img data-src="/img/cloud-3.webp" alt="" width="720" height="467" class="drift-img drift-img--c" /></div>
+      <div class="drift" data-depth="0.8" data-top="1.4"><img data-src="/img/cloud-1.webp" alt="" width="720" height="647" class="drift-img drift-img--d" /></div>
+    </div>
     <a class="skip" href="#work">Skip to work</a>
 
     <header class="site-header" data-header>
@@ -70,21 +88,6 @@
     <main id="top">
       <!-- HERO -->
       <section class="hero" aria-labelledby="hero-title">
-        <div class="hero-sky" aria-hidden="true">
-          <video
-            class="sky-video"
-            muted
-            loop
-            playsinline
-            preload="none"
-            poster="/img/sky-poster.webp"
-            data-src-desktop="/media/sky-1280.mp4"
-            data-src-mobile="/media/sky-720.mp4"
-            tabindex="-1"
-          ></video>
-          <div class="sky-fade"></div>
-        </div>
-
         <img src="/img/hand-right.webp" alt="" class="hand hand--right" width="1000" height="945" fetchpriority="high" decoding="async" data-parallax="-0.08" />
         <img src="/img/hand-left.webp" alt="" class="hand hand--left" width="843" height="900" decoding="async" data-parallax="0.06" />
         <img src="/img/butterfly.webp" alt="" class="butterfly" width="360" height="346" decoding="async" />
