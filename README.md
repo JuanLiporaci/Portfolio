@@ -1,36 +1,33 @@
-# Portafolio — Juan Liporaci
+# Portafolio — Juan Liporaci (Null Pointers)
 
-Sitio de portafolio con estética **brutalista / lo-fi digital**: paleta monocromática, texturas halftone, tipografía bold y animaciones con GSAP + Lenis.
-
-Contenido basado en el CV de Juan Liporaci (Ingeniero en sistemas, Full-Stack & Mobile).
+Sitio estático con Vite + TypeScript, sin librerías de animación. Live: https://juanliporaci.vercel.app
 
 ## Inicio rápido
 
 ```bash
-cd ~/Portafolio
 npm install
-npm run dev
+npm run dev      # http://localhost:5173
+npm run build    # dist/
 ```
 
-Abre `http://localhost:5173` en el navegador.
+## Dónde está cada cosa
 
-## Personalización
+| Qué | Dónde |
+| --- | --- |
+| Contenido (trabajos, servicios, experiencia) | `index.html` |
+| Estilos y tokens de color | `src/style.css` (`:root`) |
+| Interacciones (intro, filtros, reveals, video) | `src/main.ts` |
+| Capturas de los proyectos (WebP 1200 y 640 px) | `public/work/` |
+| Manos, mariposa, póster del cielo, favicon, OG | `public/img/` |
+| Cielo animado (Higgsfield, loop de 7 s, sin audio) | `public/media/sky-1280.mp4`, `sky-720.mp4` |
 
-1. **Enlaces**: los elementos con `data-link-placeholder` en `index.html` (proyectos, LinkedIn, GitHub, Instagram) esperan URLs reales.
-2. **Assets**: coloca imágenes en `public/` y referéncialas desde el HTML o CSS.
-3. **Colores**: variables CSS en `src/style.css` (`--bg`, `--fg`).
-4. **Manos halftone**: edita los paths SVG en `index.html` o sustituye por tu imagen con filtro halftone.
+## Añadir un trabajo
 
-## Scripts
+1. Captura de la web a 1440×900 → `public/work/<nombre>-1200.webp` y `-640.webp`.
+2. Copia un `<article class="card">` en `index.html`, cambia link, textos y `data-cat` (`saas`, `app`, `web`, `lab`).
+3. Actualiza el número del filtro "All".
 
-| Comando        | Descripción              |
-| -------------- | ------------------------ |
-| `npm run dev`  | Servidor de desarrollo   |
-| `npm run build`| Build de producción      |
-| `npm run preview` | Vista previa del build |
+## Rendimiento
 
-## Stack
-
-- [Vite](https://vitejs.dev/)
-- [GSAP](https://gsap.com/) + ScrollTrigger
-- [Lenis](https://lenis.darkroom.engineering/) (scroll suave)
+- El video del cielo solo carga después del primer pintado, se reproduce mientras el hero está en pantalla y no carga con "ahorro de datos" ni con movimiento reducido (queda el póster).
+- Animaciones solo con `transform`/`opacity`; acordeón con `<details name>` + `interpolate-size`; filtro con View Transitions.

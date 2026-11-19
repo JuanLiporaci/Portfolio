@@ -2,723 +2,438 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Juan Liporaci — Null Pointers</title>
     <meta
       name="description"
-      content="Juan Liporaci — Full-Stack & Mobile Developer. React Native, Node.js, AI automation."
+      content="Juan Liporaci, systems engineer in Caracas. SaaS, mobile apps and AI agents for real businesses — klai, Mekka, Cuadra, Ronda, Apis, Tigritos and more."
     />
-    <title>Juan Liporaci — NULL POINTERS</title>
-    <link rel="icon" href="/assets/eye-halftone.png" type="image/png" />
-    <link rel="apple-touch-icon" href="/assets/eye-halftone.png" />
+    <meta name="theme-color" content="#e9ebed" />
+    <meta property="og:title" content="Juan Liporaci — Null Pointers" />
+    <meta property="og:description" content="SaaS, mobile apps and AI agents, built end to end." />
+    <meta property="og:image" content="/img/og.jpg" />
+    <link rel="icon" href="/img/favicon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/img/favicon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,400&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap"
       rel="stylesheet"
     />
-    <link
-      rel="preload"
-      href="/fonts/departure-mono.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-    <link
-      rel="preload"
-      href="/fonts/commit-mono.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-    <script>
-      (function () {
-        if (window.matchMedia("(max-width: 768px)").matches) {
-          document.documentElement.classList.add("is-mobile", "mobile-ambient-css");
-        }
-      })();
-    </script>
-    <style>
-      @media (max-width: 768px) {
-        html.is-mobile .site-nav {
-          display: none !important;
-        }
-
-        html.is-mobile .menu-toggle {
-          display: flex !important;
-        }
-
-        html.is-mobile .hero-rail {
-          display: none !important;
-        }
-
-        html.is-mobile .hero {
-          grid-template-columns: 1fr !important;
-          grid-template-rows: auto auto !important;
-          min-height: auto !important;
-        }
-
-        html.is-mobile .hero-intro {
-          grid-row: 1 !important;
-          grid-column: 1 !important;
-          max-width: none !important;
-        }
-
-        html.is-mobile .hero-services {
-          grid-row: 2 !important;
-          grid-column: 1 !important;
-          width: 100% !important;
-        }
-
-        html.is-mobile .hand-right,
-        html.is-mobile .hand-left {
-          display: block !important;
-        }
-
-        html.is-mobile .cloud-c,
-        html.is-mobile .cloud-e,
-        html.is-mobile .cloud-f,
-        html.is-mobile .edge-cloud-right,
-        html.is-mobile .corner-eye--br,
-        html.is-mobile .ambient-video {
-          display: none !important;
-        }
-
-        html.is-mobile.mobile-ambient-css .ambient-deco {
-          opacity: 0.45;
-        }
-
-        html.is-mobile.mobile-ambient-css .corner-eye {
-          opacity: 0.12;
-        }
-      }
-    </style>
+    <link rel="preload" href="/fonts/commit-mono.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/img/sky-poster.webp" as="image" fetchpriority="high" />
   </head>
-  <body class="is-loading">
-    <div id="preloader" aria-hidden="true">
-      <div class="preloader-inner">
-        <span class="preloader-logo">NULL POINTERS</span>
-        <div class="preloader-bar"><span></span></div>
-        <span class="preloader-count">0</span>
-      </div>
-    </div>
+  <body>
+    <a class="skip" href="#work">Skip to work</a>
 
-    <div id="grain" aria-hidden="true"></div>
-    <div id="cursor-dot" aria-hidden="true"></div>
-    <div id="cursor-ring" aria-hidden="true"></div>
-
-    <div id="ambient-bg" aria-hidden="true">
-      <div class="ambient-sky">
-        <video
-          id="sky-video"
-          class="ambient-video"
-          muted
-          playsinline
-          preload="none"
-          tabindex="-1"
-          data-desktop-src="/assets/sky-video.mp4"
-        >
-          <source type="video/mp4" />
-        </video>
-        <div class="ambient-sky-tint"></div>
-      </div>
-
-      <div class="ambient-deco-layer">
-        <img
-          src="/assets/cloud-1.png"
-          alt=""
-          class="ambient-deco cloud cloud-a"
-          data-depth="0.15"
-          width="520"
-          height="320"
-          decoding="async"
-        />
-        <img
-          src="/assets/cloud-2.png"
-          alt=""
-          class="ambient-deco cloud cloud-b"
-          data-depth="0.22"
-          width="480"
-          height="300"
-          decoding="async"
-        />
-        <img
-          src="/assets/cloud-3.png"
-          alt=""
-          class="ambient-deco cloud cloud-c"
-          data-depth="0.35"
-          width="560"
-          height="340"
-          decoding="async"
-          loading="lazy"
-        />
-        <img
-          src="/assets/cloud-1.png"
-          alt=""
-          class="ambient-deco cloud cloud-d"
-          data-depth="0.28"
-          width="400"
-          height="260"
-          decoding="async"
-          loading="lazy"
-        />
-        <img
-          src="/assets/cloud-2.png"
-          alt=""
-          class="ambient-deco cloud cloud-e"
-          data-depth="0.32"
-          width="360"
-          height="220"
-          decoding="async"
-          loading="lazy"
-        />
-        <img
-          src="/assets/cloud-3.png"
-          alt=""
-          class="ambient-deco cloud cloud-f"
-          data-depth="0.38"
-          width="420"
-          height="260"
-          decoding="async"
-          loading="lazy"
-        />
-        <img
-          src="/assets/butterfly.png"
-          alt=""
-          class="ambient-deco butterfly"
-          data-depth="0.55"
-          width="200"
-          height="200"
-          decoding="async"
-        />
-      </div>
-
-      <div class="ambient-corners" aria-hidden="true">
-        <img
-          src="/assets/eye-halftone.png"
-          alt=""
-          class="corner-eye corner-eye--tl"
-          width="120"
-          height="120"
-          decoding="async"
-        />
-        <img
-          src="/assets/eye-halftone.png"
-          alt=""
-          class="corner-eye corner-eye--br"
-          width="100"
-          height="100"
-          decoding="async"
-          loading="lazy"
-        />
-      </div>
-
-      <div class="ambient-edge ambient-edge--top" aria-hidden="true">
-        <img src="/assets/cloud-2.png" alt="" class="edge-cloud edge-cloud-left" loading="lazy" decoding="async" />
-        <img src="/assets/cloud-1.png" alt="" class="edge-cloud edge-cloud-right" loading="lazy" decoding="async" />
-      </div>
-    </div>
-
-    <header class="site-header">
-      <div class="brand" data-animate="fade">
-        <a href="#" class="logo-block">NULL POINTERS</a>
-        <span class="brand-handle">@JUAN.LIPORACI</span>
-      </div>
+    <header class="site-header" data-header>
+      <a href="#top" class="logo" aria-label="Null Pointers, home">
+        <span class="logo-mark">NULL POINTERS</span>
+      </a>
       <nav class="site-nav" aria-label="Main">
-        <a href="#services">Services</a>
         <a href="#work">Work</a>
-        <a href="#experience">Experience</a>
-        <a href="#contact" class="nav-cta">Contact</a>
+        <a href="#services">Services</a>
+        <a href="#about">About</a>
+        <a href="#contact" class="btn btn--accent btn--sm">Start a project</a>
       </nav>
-      <button
-        type="button"
-        class="menu-toggle"
-        aria-label="Open menu"
-        aria-expanded="false"
-      >
+      <button type="button" class="menu-toggle" aria-label="Menu" aria-expanded="false" aria-controls="drawer">
         <span></span><span></span>
       </button>
     </header>
 
-    <div class="mobile-drawer" hidden>
+    <div class="drawer" id="drawer" hidden>
       <nav aria-label="Mobile">
-        <a href="#services">Services</a>
         <a href="#work">Work</a>
-        <a href="#experience">Experience</a>
+        <a href="#services">Services</a>
+        <a href="#about">About</a>
         <a href="#contact">Contact</a>
       </nav>
     </div>
 
-    <main>
+    <main id="top">
+      <!-- HERO -->
       <section class="hero" aria-labelledby="hero-title">
-        <div class="hero-stage">
-          <img
-            src="/assets/hand-right.png"
-            alt=""
-            class="halftone-asset hand-right"
-            width="640"
-            height="640"
-            decoding="async"
-            fetchpriority="high"
-            loading="eager"
-          />
-          <img
-            src="/assets/hand-left.png"
-            alt=""
-            class="halftone-asset hand-left"
-            width="480"
-            height="480"
-            decoding="async"
-            fetchpriority="high"
-            loading="eager"
-          />
+        <div class="hero-sky" aria-hidden="true">
+          <video
+            class="sky-video"
+            muted
+            loop
+            playsinline
+            preload="none"
+            poster="/img/sky-poster.webp"
+            data-src-desktop="/media/sky-1280.mp4"
+            data-src-mobile="/media/sky-720.mp4"
+            tabindex="-1"
+          ></video>
+          <div class="sky-fade"></div>
         </div>
 
-        <aside class="hero-rail" aria-hidden="true">
-          <span class="vertical-label">Our Services</span>
-        </aside>
+        <img src="/img/hand-right.webp" alt="" class="hand hand--right" width="1000" height="945" fetchpriority="high" decoding="async" data-parallax="-0.08" />
+        <img src="/img/hand-left.webp" alt="" class="hand hand--left" width="843" height="900" decoding="async" data-parallax="0.06" />
+        <img src="/img/butterfly.webp" alt="" class="butterfly" width="360" height="346" decoding="async" />
 
-        <div class="hero-services" id="services">
-          <ul class="service-list" role="list">
-            <li class="service-row" data-service>
-              <div class="service-line"></div>
-              <button
-                type="button"
-                class="service-trigger"
-                aria-expanded="false"
-                aria-controls="svc-1"
-              >
-                <span class="service-name">App development</span>
-                <span class="service-icon" aria-hidden="true">+</span>
-              </button>
-              <div id="svc-1" class="service-panel">
-                <div class="service-panel-inner">
-                  <p>
-                    React Native &amp; Expo apps from architecture to App Store
-                    and Google Play. UI/UX, APIs, payments, and production ops.
-                  </p>
-                </div>
-              </div>
-            </li>
-            <li class="service-row" data-service>
-              <div class="service-line"></div>
-              <button
-                type="button"
-                class="service-trigger"
-                aria-expanded="false"
-                aria-controls="svc-2"
-              >
-                <span class="service-name">Landing page</span>
-                <span class="service-icon" aria-hidden="true">+</span>
-              </button>
-              <div id="svc-2" class="service-panel">
-                <div class="service-panel-inner">
-                  <p>
-                    High-impact one-pagers with motion, SEO, and conversion
-                    focus. Built for launches and personal brands.
-                  </p>
-                </div>
-              </div>
-            </li>
-            <li class="service-row" data-service>
-              <div class="service-line"></div>
-              <button
-                type="button"
-                class="service-trigger"
-                aria-expanded="false"
-                aria-controls="svc-3"
-              >
-                <span class="service-name">Web app</span>
-                <span class="service-icon" aria-hidden="true">+</span>
-              </button>
-              <div id="svc-3" class="service-panel">
-                <div class="service-panel-inner">
-                  <p>
-                    React apps with dashboards, auth, APIs, and production
-                    deployment. Custom scope per client.
-                  </p>
-                </div>
-              </div>
-            </li>
-            <li class="service-row" data-service>
-              <div class="service-line"></div>
-              <button
-                type="button"
-                class="service-trigger"
-                aria-expanded="false"
-                aria-controls="svc-4"
-              >
-                <span class="service-name">Marketplace</span>
-                <span class="service-icon" aria-hidden="true">+</span>
-              </button>
-              <div id="svc-4" class="service-panel">
-                <div class="service-panel-inner">
-                  <p>
-                    Multi-vendor platforms with payments, catalog, and admin
-                    panels. Live experience with Tigritos on App Store &amp; Play.
-                  </p>
-                </div>
-              </div>
-            </li>
-            <li class="service-row" data-service>
-              <div class="service-line"></div>
-              <button
-                type="button"
-                class="service-trigger"
-                aria-expanded="false"
-                aria-controls="svc-5"
-              >
-                <span class="service-name">AI automation</span>
-                <span class="service-icon" aria-hidden="true">+</span>
-              </button>
-              <div id="svc-5" class="service-panel">
-                <div class="service-panel-inner">
-                  <p>
-                    Make/n8n bots, QBO &amp; Sheets integrations, Telegram
-                    workflows, and team-specific GPT assistants.
-                  </p>
-                </div>
-              </div>
-            </li>
-          </ul>
-        </div>
-
-        <div class="hero-intro">
-          <p class="hero-eyebrow">Systems Engineer · Caracas, VE</p>
-          <h1 id="hero-title">
-            <span class="title-line">We build digital</span>
-            <span class="title-line">products end</span>
-            <span class="title-line">to end.</span>
+        <div class="hero-copy">
+          <p class="status"><span class="dot" aria-hidden="true"></span> Available for new projects</p>
+          <h1 id="hero-title" class="hero-title" data-split>
+            Digital products, built end&nbsp;to&nbsp;end.
           </h1>
-          <p class="hero-desc">
-            CEO at Tigritos. Full-Stack mobile &amp; web. 5K+ live users, 7K+
-            followers. Top 10 at Hackatón Alegría 2025.
+          <p class="hero-lede">
+            I'm Juan Liporaci, a systems engineer in Caracas. I design, build and ship SaaS, mobile apps
+            and AI agents for real businesses — fourteen of them online right now.
           </p>
-          <a
-            href="https://wa.me/584141809040"
-            class="hero-cta magnetic"
-            data-magnetic
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Start a project
-          </a>
-        </div>
-      </section>
-
-      <section class="marquee-section" aria-label="Tech stack">
-        <div class="marquee" data-marquee>
-          <div class="marquee-inner">
-            <div class="marquee-track">
-              <span class="marquee-item">
-                <img src="https://svgl.app/library/react_light.svg" alt="React" width="28" height="28" />
-                React
-              </span>
-              <span class="marquee-item">
-                <img src="https://svgl.app/library/expo.svg" alt="Expo" width="28" height="28" />
-                React Native
-              </span>
-              <span class="marquee-item">
-                <img src="https://svgl.app/library/nodejs.svg" alt="Node.js" width="28" height="28" />
-                Node.js
-              </span>
-              <span class="marquee-item">
-                <img src="https://svgl.app/library/typescript.svg" alt="TypeScript" width="28" height="28" />
-                TypeScript
-              </span>
-              <span class="marquee-item">
-                <img src="https://svgl.app/library/firebase.svg" alt="Firebase" width="28" height="28" />
-                Firebase
-              </span>
-              <span class="marquee-item">Make</span>
-              <span class="marquee-item">n8n</span>
-              <span class="marquee-item">DigitalOcean</span>
-              <span class="marquee-item">GSAP</span>
-            </div>
-            <div class="marquee-track" aria-hidden="true">
-              <span class="marquee-item">
-                <img src="https://svgl.app/library/react_light.svg" alt="" width="28" height="28" />
-                React
-              </span>
-              <span class="marquee-item">
-                <img src="https://svgl.app/library/expo.svg" alt="" width="28" height="28" />
-                React Native
-              </span>
-              <span class="marquee-item">
-                <img src="https://svgl.app/library/nodejs.svg" alt="" width="28" height="28" />
-                Node.js
-              </span>
-              <span class="marquee-item">
-                <img src="https://svgl.app/library/typescript.svg" alt="" width="28" height="28" />
-                TypeScript
-              </span>
-              <span class="marquee-item">
-                <img src="https://svgl.app/library/firebase.svg" alt="" width="28" height="28" />
-                Firebase
-              </span>
-              <span class="marquee-item">Make</span>
-              <span class="marquee-item">n8n</span>
-              <span class="marquee-item">DigitalOcean</span>
-              <span class="marquee-item">GSAP</span>
-            </div>
+          <div class="hero-actions">
+            <a href="https://wa.me/584141809040?text=Hi%20Juan%2C%20I%20saw%20your%20portfolio%20and%20have%20a%20project%20in%20mind." class="btn btn--accent" target="_blank" rel="noopener noreferrer">
+              Start a project
+              <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6" /></svg>
+            </a>
+            <a href="#work" class="btn btn--ghost">See the work</a>
           </div>
         </div>
+
+        <ul class="hero-facts" role="list">
+          <li><strong>14</strong><span>products online</span></li>
+          <li><strong>5K+</strong><span>Tigritos users</span></li>
+          <li><strong>Top 10</strong><span>Hackatón Alegría 2025</span></li>
+          <li><strong>7 yrs</strong><span>running Koi Digital</span></li>
+        </ul>
       </section>
 
-      <section id="work" class="work section-panel" aria-labelledby="work-title">
-        <div class="section-edge-deco" aria-hidden="true">
-          <img src="/assets/cloud-3.png" alt="" class="section-cloud section-cloud--tl" loading="lazy" decoding="async" />
+      <!-- STACK -->
+      <section class="stack" aria-label="Tools I work with">
+        <div class="stack-track">
+          <ul role="list">
+            <li>Next.js</li><li>React Native</li><li>Flutter</li><li>TypeScript</li><li>Node</li><li>Postgres</li><li>Neon</li><li>Supabase</li><li>Vercel</li><li>WhatsApp Cloud API</li><li>Shopify</li><li>Claude</li><li>n8n</li>
+          </ul>
+          <ul role="list" aria-hidden="true">
+            <li>Next.js</li><li>React Native</li><li>Flutter</li><li>TypeScript</li><li>Node</li><li>Postgres</li><li>Neon</li><li>Supabase</li><li>Vercel</li><li>WhatsApp Cloud API</li><li>Shopify</li><li>Claude</li><li>n8n</li>
+          </ul>
         </div>
+      </section>
+
+      <!-- WORK -->
+      <section id="work" class="work" aria-labelledby="work-title">
         <div class="section-head">
-          <h2 id="work-title" class="section-tag">Selected Work</h2>
-          <p class="section-sub">Live products in production</p>
+          <h2 id="work-title" class="section-title" data-reveal>Selected work</h2>
+          <p class="section-note" data-reveal>Everything here is online. Click through and use it.</p>
         </div>
-        <div class="work-scroll" data-horizontal-scroll>
-          <article class="work-card" data-project>
-            <span class="work-num">01</span>
-            <div class="work-visual work-visual--logo work-visual--logo-light">
-              <img
-                src="/assets/tigritos-logo.png"
-                alt="Tigritos logo"
-                class="work-logo"
-              />
-            </div>
-            <h3>Tigritos</h3>
-            <p>React Native · Expo · Node.js · Custom payments</p>
-            <ul class="work-tags">
-              <li>App Store</li>
-              <li>Google Play</li>
-              <li>5K+ users</li>
-            </ul>
-            <div class="work-links">
-              <a
-                href="https://play.google.com/store/apps/details?id=com.tigritos.app&hl=es&pli=1"
-                class="work-link"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Google Play
-              </a>
-              <a
-                href="https://apps.apple.com/ve/app/tigritos/id6756139037"
-                class="work-link"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                App Store
-              </a>
-            </div>
-          </article>
-          <article class="work-card" data-project>
-            <span class="work-num">02</span>
-            <div class="work-visual work-visual--logo work-visual--logo-light">
-              <img
-                src="/assets/ice-cars-logo.png"
-                alt="ICE Cars logo"
-                class="work-logo"
-                loading="lazy"
-                decoding="async"
-              />
-            </div>
-            <h3>ICE Cars</h3>
-            <p>E-commerce · Multi-site inventory ·</p>
-            <ul class="work-tags">
-              <li>Admin panel</li>
-              <li>Profit reports</li>
-              <li>Shop</li>
-            </ul>
-            <a
-              href="https://www.icecars.store/shop"
-              class="work-link"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Visit shop
+
+        <div class="filters" role="toolbar" aria-label="Filter projects" data-filters>
+          <span class="filters-pill" aria-hidden="true"></span>
+          <button type="button" aria-pressed="true" data-filter="all">All <span>12</span></button>
+          <button type="button" aria-pressed="false" data-filter="saas">SaaS</button>
+          <button type="button" aria-pressed="false" data-filter="app">Apps</button>
+          <button type="button" aria-pressed="false" data-filter="web">Websites</button>
+          <button type="button" aria-pressed="false" data-filter="lab">Games &amp; prototypes</button>
+        </div>
+
+        <div class="work-grid" data-grid>
+          <article class="card card--wide" data-cat="saas" data-reveal style="--tone:#0f1a12">
+            <a class="card-link" href="https://klai.online" target="_blank" rel="noopener noreferrer">
+              <figure class="frame">
+                <figcaption class="frame-bar"><span>klai.online</span></figcaption>
+                <img src="/work/klai-1200.webp" srcset="/work/klai-640.webp 640w, /work/klai-1200.webp 1200w" sizes="(max-width: 800px) 92vw, 60vw" alt="klai landing page: Tu WhatsApp atiende, vende y cobra solo" width="1200" height="750" loading="lazy" decoding="async" />
+              </figure>
+              <div class="card-body">
+                <p class="card-meta"><span class="live">Live</span> SaaS · 2026</p>
+                <h3>klai</h3>
+                <p>An AI employee for a business's WhatsApp: answers instantly, takes orders and confirms Pago Móvil, Binance and Zelle payments without chasing screenshots. Multi-tenant, with plans and an admin.</p>
+                <ul class="tags" role="list"><li>Meta Cloud API</li><li>Postgres</li><li>Better Auth</li><li>LLM agents</li></ul>
+                <span class="card-cta">Visit klai.online <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6" /></svg></span>
+              </div>
             </a>
           </article>
-          <article class="work-card" data-project>
-            <span class="work-num">03</span>
-            <div class="work-visual work-visual--plain">
-              <img src="https://svgl.app/library/nodejs.svg" alt="" width="48" height="48" />
-            </div>
-            <h3>Chirinos Auto</h3>
-            <p>Sales system · Make · n8n · QuickBooks</p>
-            <ul class="work-tags">
-              <li>KPIs</li>
-              <li>Automation</li>
-              <li>GPT</li>
-            </ul>
+
+          <article class="card" data-cat="saas" data-reveal>
+            <a class="card-link" href="https://mekka-six.vercel.app" target="_blank" rel="noopener noreferrer">
+              <figure class="frame">
+                <figcaption class="frame-bar"><span>mekka-six.vercel.app</span></figcaption>
+                <img src="/work/mekka-1200.webp" srcset="/work/mekka-640.webp 640w, /work/mekka-1200.webp 1200w" sizes="(max-width: 800px) 92vw, 45vw" alt="Mekka landing page: Del portón a la factura, sin papelitos" width="1200" height="750" loading="lazy" decoding="async" />
+              </figure>
+              <div class="card-body">
+                <p class="card-meta"><span class="live">Live</span> SaaS · 2026</p>
+                <h3>Mekka</h3>
+                <p>The system for Venezuelan auto shops: intake with photos and signature, jobs, invoices in Bs and USD, payments and reports.</p>
+                <span class="card-cta">Visit <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6" /></svg></span>
+              </div>
+            </a>
           </article>
-          <article class="work-card" data-project>
-            <span class="work-num">04</span>
-            <div class="work-visual work-visual--plain">
-              <img src="https://svgl.app/library/react_light.svg" alt="" width="48" height="48" />
-            </div>
-            <h3>Rectificadora Retoica</h3>
-            <p>React · Real-time operations management</p>
-            <ul class="work-tags">
-              <li>Dashboard</li>
-              <li>Clients</li>
-            </ul>
+
+          <article class="card" data-cat="saas" data-reveal>
+            <a class="card-link" href="https://cuadra-beryl.vercel.app" target="_blank" rel="noopener noreferrer">
+              <figure class="frame">
+                <figcaption class="frame-bar"><span>cuadra-beryl.vercel.app</span></figcaption>
+                <img src="/work/cuadra-1200.webp" srcset="/work/cuadra-640.webp 640w, /work/cuadra-1200.webp 1200w" sizes="(max-width: 800px) 92vw, 45vw" alt="Cuadra landing page: Tu 606, cuadrado antes del día 15" width="1200" height="750" loading="lazy" decoding="async" />
+              </figure>
+              <div class="card-body">
+                <p class="card-meta"><span class="live">Live</span> SaaS · 2026</p>
+                <h3>Cuadra</h3>
+                <p>For Dominican accountants: upload invoice photos, PDF or XML; AI reads RNC, NCF and ITBIS, validates DGII rules and exports the 606/607 file.</p>
+                <span class="card-cta">Visit <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6" /></svg></span>
+              </div>
+            </a>
           </article>
-          <article class="work-card" data-project>
-            <span class="work-num">05</span>
-            <div class="work-visual work-visual--halftone">
-              <img
-                src="/assets/subastalo.png"
-                alt="Subástalo"
-                class="work-logo work-logo--halftone"
-                loading="lazy"
-                decoding="async"
-              />
-            </div>
-            <h3>Subástalo</h3>
-            <p>Hackatón Alegría 2025 · Top 10 national</p>
-            <ul class="work-tags">
-              <li>72 hours</li>
-              <li>Firebase</li>
-            </ul>
+
+          <article class="card" data-cat="saas" data-reveal>
+            <a class="card-link" href="https://ronda-bar.vercel.app" target="_blank" rel="noopener noreferrer">
+              <figure class="frame">
+                <figcaption class="frame-bar"><span>ronda-bar.vercel.app</span></figcaption>
+                <img src="/work/ronda-1200.webp" srcset="/work/ronda-640.webp 640w, /work/ronda-1200.webp 1200w" sizes="(max-width: 800px) 92vw, 45vw" alt="Ronda landing page: pide y paga desde tu mesa" width="1200" height="750" loading="lazy" decoding="async" />
+              </figure>
+              <div class="card-body">
+                <p class="card-meta"><span class="live">Live demo</span> SaaS · 2026</p>
+                <h3>Ronda</h3>
+                <p>Order and pay from the table. Every table has a QR; the bar receives the order already paid. Venezuela and Spain markets.</p>
+                <span class="card-cta">Visit <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6" /></svg></span>
+              </div>
+            </a>
           </article>
+
+          <article class="card" data-cat="app" data-reveal>
+            <a class="card-link" href="https://apis-colmena.vercel.app" target="_blank" rel="noopener noreferrer">
+              <figure class="frame">
+                <figcaption class="frame-bar"><span>apis-colmena.vercel.app</span></figcaption>
+                <img src="/work/apis-1200.webp" srcset="/work/apis-640.webp 640w, /work/apis-1200.webp 1200w" sizes="(max-width: 800px) 92vw, 45vw" alt="Apis landing page: La colmena de tu familia" width="1200" height="750" loading="lazy" decoding="async" />
+              </figure>
+              <div class="card-body">
+                <p class="card-meta"><span class="live">Live</span> Flutter app · 2026</p>
+                <h3>Apis</h3>
+                <p>Household chores become flowers, effort becomes pollen. A family app with rewards, streaks, voice and calendar. Web app live, Google Play release in review.</p>
+                <span class="card-cta">Visit <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6" /></svg></span>
+              </div>
+            </a>
+          </article>
+
+          <article class="card card--wide card--brand" data-cat="app" data-reveal>
+            <div class="card-link">
+              <figure class="frame frame--brand">
+                <img src="/img/tigritos-logo.webp" alt="Tigritos logo" width="480" height="472" loading="lazy" decoding="async" class="brand-logo" />
+              </figure>
+              <div class="card-body">
+                <p class="card-meta"><span class="live">Live</span> Marketplace app · CEO</p>
+                <h3>Tigritos</h3>
+                <p>A services marketplace I run as CEO: React Native + Expo, a Node API, custom payments and DigitalOcean. 5K+ users and 7K+ organic Instagram followers.</p>
+                <div class="card-actions">
+                  <a href="https://apps.apple.com/ve/app/tigritos/id6756139037" class="chip-link" target="_blank" rel="noopener noreferrer">App Store <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6" /></svg></a>
+                  <a href="https://play.google.com/store/apps/details?id=com.tigritos.app" class="chip-link" target="_blank" rel="noopener noreferrer">Google Play <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6" /></svg></a>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="card" data-cat="web" data-reveal>
+            <a class="card-link" href="https://annasofiacuellar.vercel.app" target="_blank" rel="noopener noreferrer">
+              <figure class="frame">
+                <figcaption class="frame-bar"><span>annasofiacuellar.vercel.app</span></figcaption>
+                <img src="/work/anna-1200.webp" srcset="/work/anna-640.webp 640w, /work/anna-1200.webp 1200w" sizes="(max-width: 800px) 92vw, 45vw" alt="Anna Sofía Cuellar interior design portfolio" width="1200" height="750" loading="lazy" decoding="async" />
+              </figure>
+              <div class="card-body">
+                <p class="card-meta"><span class="live">Live</span> Portfolio site · 2026</p>
+                <h3>Anna Sofía Cuellar</h3>
+                <p>An editorial portfolio for an interior designer: arched video, scroll-driven reveals and a gallery that works by swipe.</p>
+                <span class="card-cta">Visit <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6" /></svg></span>
+              </div>
+            </a>
+          </article>
+
+          <article class="card" data-cat="web" data-reveal>
+            <a class="card-link" href="https://www.icecars.store" target="_blank" rel="noopener noreferrer">
+              <figure class="frame">
+                <figcaption class="frame-bar"><span>icecars.store</span></figcaption>
+                <img src="/work/icecars-1200.webp" srcset="/work/icecars-640.webp 640w, /work/icecars-1200.webp 1200w" sizes="(max-width: 800px) 92vw, 45vw" alt="ICE Cars store: Refrigeración automotriz de clase mundial" width="1200" height="750" loading="lazy" decoding="async" />
+              </figure>
+              <div class="card-body">
+                <p class="card-meta"><span class="live">Live</span> E-commerce · 2025</p>
+                <h3>ICE Cars</h3>
+                <p>Store, landing and admin for an auto A/C importer: multi-site inventory, profit reports and live USD/Bs rates.</p>
+                <span class="card-cta">Visit <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6" /></svg></span>
+              </div>
+            </a>
+          </article>
+
+          <article class="card" data-cat="lab" data-reveal>
+            <a class="card-link" href="https://metropolitana-indol.vercel.app" target="_blank" rel="noopener noreferrer">
+              <figure class="frame">
+                <figcaption class="frame-bar"><span>metropolitana-indol.vercel.app</span></figcaption>
+                <img src="/work/metropolitana-1200.webp" srcset="/work/metropolitana-640.webp 640w, /work/metropolitana-1200.webp 1200w" sizes="(max-width: 800px) 92vw, 45vw" alt="Metropolitana Care: patient timeline for family members" width="1200" height="750" loading="lazy" decoding="async" />
+              </figure>
+              <div class="card-body">
+                <p class="card-meta"><span class="proto">Prototype</span> Health app · 2026</p>
+                <h3>Metropolitana Care</h3>
+                <p>Keeps families updated while a relative is in hospital: room, visits, medication and tests on one live timeline.</p>
+                <span class="card-cta">Open <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6" /></svg></span>
+              </div>
+            </a>
+          </article>
+
+          <article class="card" data-cat="lab" data-reveal>
+            <a class="card-link" href="https://global-pets-mu.vercel.app" target="_blank" rel="noopener noreferrer">
+              <figure class="frame">
+                <figcaption class="frame-bar"><span>global-pets-mu.vercel.app</span></figcaption>
+                <img src="/work/globalpets-1200.webp" srcset="/work/globalpets-640.webp 640w, /work/globalpets-1200.webp 1200w" sizes="(max-width: 800px) 92vw, 45vw" alt="GlobalPets app home with pets and appointments" width="1200" height="750" loading="lazy" decoding="async" />
+              </figure>
+              <div class="card-body">
+                <p class="card-meta"><span class="proto">Prototype</span> Vet app · 2026</p>
+                <h3>GlobalPets</h3>
+                <p>A vet clinic app for owners: their pets, appointments, hospitalization updates and emergencies in one place.</p>
+                <span class="card-cta">Open <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6" /></svg></span>
+              </div>
+            </a>
+          </article>
+
+          <article class="card" data-cat="lab" data-reveal>
+            <a class="card-link" href="https://pulse-delta-rose.vercel.app" target="_blank" rel="noopener noreferrer">
+              <figure class="frame">
+                <figcaption class="frame-bar"><span>pulse-delta-rose.vercel.app</span></figcaption>
+                <img src="/work/pulse-1200.webp" srcset="/work/pulse-640.webp 640w, /work/pulse-1200.webp 1200w" sizes="(max-width: 800px) 92vw, 45vw" alt="Pulse: tap when the rings meet" width="1200" height="750" loading="lazy" decoding="async" />
+              </figure>
+              <div class="card-body">
+                <p class="card-meta"><span class="proto">Game</span> Web · 2026</p>
+                <h3>Pulse</h3>
+                <p>A one-tap timing game: hit when the rings meet, climb from Bronze up. Built to feel good on a phone.</p>
+                <span class="card-cta">Play <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6" /></svg></span>
+              </div>
+            </a>
+          </article>
+
+          <article class="card" data-cat="lab" data-reveal>
+            <a class="card-link" href="https://que-no-te-pillen.vercel.app" target="_blank" rel="noopener noreferrer">
+              <figure class="frame">
+                <figcaption class="frame-bar"><span>que-no-te-pillen.vercel.app</span></figcaption>
+                <img src="/work/quenotepillen-1200.webp" srcset="/work/quenotepillen-640.webp 640w, /work/quenotepillen-1200.webp 1200w" sizes="(max-width: 800px) 92vw, 45vw" alt="¡Que no te pillen! game welcome screen" width="1200" height="750" loading="lazy" decoding="async" />
+              </figure>
+              <div class="card-body">
+                <p class="card-meta"><span class="proto">Game</span> Web · 2026</p>
+                <h3>¡Que no te pillen!</h3>
+                <p>An arcade game with daily rewards, missions and a ranking. Small, fast and a little addictive.</p>
+                <span class="card-cta">Play <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6" /></svg></span>
+              </div>
+            </a>
+          </article>
+        </div>
+
+        <div class="private" data-reveal>
+          <h3 class="private-title">Also shipped, behind a login</h3>
+          <ol class="private-list" role="list">
+            <li>
+              <a href="https://briutcare.vercel.app" target="_blank" rel="noopener noreferrer">
+                <span class="p-name">StreetIQ</span>
+                <span class="p-desc">Sales and collections CRM for Grupo Briutcare's field team</span>
+                <span class="p-tag">Client · 2026</span>
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6" /></svg>
+              </a>
+            </li>
+            <li>
+              <a href="https://cotizadorlumen.vercel.app" target="_blank" rel="noopener noreferrer">
+                <span class="p-name">Lumen</span>
+                <span class="p-desc">Quoting tool and admin panel synced with a Shopify store</span>
+                <span class="p-tag">Client · 2026</span>
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6" /></svg>
+              </a>
+            </li>
+            <li>
+              <div>
+                <span class="p-name">Chirinos Auto</span>
+                <span class="p-desc">Sales system, Make/n8n bots, QuickBooks and a GPT assistant per team — Texas</span>
+                <span class="p-tag">Client · 2025</span>
+              </div>
+            </li>
+            <li>
+              <div>
+                <span class="p-name">Subástalo</span>
+                <span class="p-desc">Auction app built in 72 hours — top 10 of 1,500 at Hackatón Alegría</span>
+                <span class="p-tag">Hackathon · 2025</span>
+              </div>
+            </li>
+          </ol>
         </div>
       </section>
 
-      <section
-        id="experience"
-        class="experience section-panel"
-        aria-labelledby="exp-title"
-      >
-        <div class="section-edge-deco" aria-hidden="true">
-          <img src="/assets/butterfly.png" alt="" class="section-butterfly" loading="lazy" decoding="async" />
-        </div>
+      <!-- SERVICES -->
+      <section id="services" class="services" aria-labelledby="services-title">
         <div class="section-head">
-          <h2 id="exp-title" class="section-tag">Experience</h2>
+          <h2 id="services-title" class="section-title" data-reveal>What I can build for you</h2>
+          <p class="section-note" data-reveal>From the first sketch to the app store, one person accountable.</p>
         </div>
-        <ol class="experience-list">
-          <li class="experience-item" data-experience>
-            <div class="experience-line"></div>
-            <div class="experience-head">
-              <h3>CEO &amp; Full-Stack Mobile Developer</h3>
-              <span class="experience-org">Tigritos</span>
-              <time class="experience-when">2026 — Present</time>
-            </div>
-            <p>
-              End-to-end product: App Store &amp; Play, Express API, custom
-              payments, DigitalOcean. 5K+ users, 7K+ organic Instagram
-              followers.
-            </p>
+        <div class="accordion">
+          <details name="svc" open data-reveal>
+            <summary><span class="svc-name">SaaS &amp; web apps</span><span class="svc-icon" aria-hidden="true"></span></summary>
+            <div class="svc-body"><p>Multi-tenant products with auth, billing, dashboards and an admin — like Mekka, Cuadra and klai. Next.js, Postgres, deployed and monitored.</p></div>
+          </details>
+          <details name="svc" data-reveal>
+            <summary><span class="svc-name">Mobile apps</span><span class="svc-icon" aria-hidden="true"></span></summary>
+            <div class="svc-body"><p>React Native or Flutter, from architecture to App Store and Google Play review — push, payments, offline mode included.</p></div>
+          </details>
+          <details name="svc" data-reveal>
+            <summary><span class="svc-name">AI agents on WhatsApp</span><span class="svc-icon" aria-hidden="true"></span></summary>
+            <div class="svc-body"><p>Agents that answer, sell, book real appointments and confirm payments inside the chat. Tuned for cost, with your catalog as the source of truth.</p></div>
+          </details>
+          <details name="svc" data-reveal>
+            <summary><span class="svc-name">Landing pages &amp; portfolios</span><span class="svc-icon" aria-hidden="true"></span></summary>
+            <div class="svc-body"><p>Fast, editorial sites with motion that serves the content. Real product screens instead of stock photos.</p></div>
+          </details>
+          <details name="svc" data-reveal>
+            <summary><span class="svc-name">Automation &amp; integrations</span><span class="svc-icon" aria-hidden="true"></span></summary>
+            <div class="svc-body"><p>Shopify, QuickBooks, Google Sheets, Telegram and n8n wired together so your team stops copying data by hand.</p></div>
+          </details>
+        </div>
+      </section>
+
+      <!-- ABOUT / EXPERIENCE -->
+      <section id="about" class="about" aria-labelledby="about-title">
+        <div class="about-intro">
+          <h2 id="about-title" class="section-title" data-reveal>About</h2>
+          <p class="about-lede" data-reveal>
+            Software engineer from UNIMET. I've spent seven years running a digital agency and the last two
+            shipping products that people pay for. I care about the boring parts too: payments that reconcile,
+            apps that pass review, pages that load on a 3G phone in Caracas.
+          </p>
+        </div>
+        <ol class="timeline" role="list">
+          <li data-reveal>
+            <time>2026 —</time>
+            <div><h3>Founder</h3><p>klai · WhatsApp AI for businesses</p></div>
           </li>
-          <li class="experience-item" data-experience>
-            <div class="experience-line"></div>
-            <div class="experience-head">
-              <h3>Full-Stack Developer</h3>
-              <span class="experience-org">ICE Cars</span>
-              <time class="experience-when">2025 — Present</time>
-            </div>
-            <p>
-              E-commerce, landing, and admin system: multi-site inventory,
-              profit reports, and Venezuela USD exchange rate APIs.
-            </p>
+          <li data-reveal>
+            <time>2026 —</time>
+            <div><h3>CEO &amp; mobile developer</h3><p>Tigritos · services marketplace</p></div>
           </li>
-          <li class="experience-item" data-experience>
-            <div class="experience-line"></div>
-            <div class="experience-head">
-              <h3>Full-Stack Developer</h3>
-              <span class="experience-org">Chirinos Auto · Texas</span>
-              <time class="experience-when">2025 — Present</time>
-            </div>
-            <p>
-              Custom sales system, Make/n8n bots, QuickBooks, Google Sheets,
-              Telegram, and GPT assistants per team.
-            </p>
+          <li data-reveal>
+            <time>2025 —</time>
+            <div><h3>Full-stack developer</h3><p>ICE Cars · Chirinos Auto (Texas) · Rectificadora Retoica</p></div>
           </li>
-          <li class="experience-item" data-experience>
-            <div class="experience-line"></div>
-            <div class="experience-head">
-              <h3>Full-Stack Developer</h3>
-              <span class="experience-org">Rectificadora Retoica</span>
-              <time class="experience-when">2025 — Present</time>
-            </div>
-            <p>
-              React platform for real-time operations management: client
-              dashboards, live workflows, and day-to-day shop visibility.
-            </p>
-          </li>
-          <li class="experience-item" data-experience>
-            <div class="experience-line"></div>
-            <div class="experience-head">
-              <h3>Founder &amp; General Manager</h3>
-              <span class="experience-org">Koi Digital Agency</span>
-              <time class="experience-when">2019 — Present</time>
-            </div>
-            <p>
-              5+ years leading digital strategy and creative/technical teams
-              across multiple industries.
-            </p>
+          <li data-reveal>
+            <time>2019 —</time>
+            <div><h3>Founder &amp; general manager</h3><p>Koi Digital Agency</p></div>
           </li>
         </ol>
       </section>
 
-      <section class="stats full-bleed" aria-label="Metrics">
-        <div class="stats-inner">
-          <div class="stat" data-stat>
-            <span class="stat-value" data-count="5000">0</span>
-            <span class="stat-label">Tigritos users</span>
+      <!-- CONTACT -->
+      <section id="contact" class="contact" aria-labelledby="contact-title">
+        <img src="/img/hand-left.webp" alt="" class="contact-hand" width="843" height="900" loading="lazy" decoding="async" />
+        <div class="contact-inner">
+          <p class="status"><span class="dot" aria-hidden="true"></span> Available for new projects</p>
+          <h2 id="contact-title" class="contact-title" data-reveal>Let's build yours.</h2>
+          <div class="hero-actions" data-reveal>
+            <a href="https://wa.me/584141809040?text=Hi%20Juan%2C%20I%20saw%20your%20portfolio%20and%20have%20a%20project%20in%20mind." class="btn btn--accent btn--lg" target="_blank" rel="noopener noreferrer">
+              Message on WhatsApp
+              <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 12 12 4M6 4h6v6" /></svg>
+            </a>
+            <a href="mailto:juanandresliporaci@hotmail.com" class="btn btn--ghost btn--lg">Email me</a>
           </div>
-          <div class="stat" data-stat>
-            <span class="stat-value" data-count="7000">0</span>
-            <span class="stat-label">Instagram followers</span>
-          </div>
-          <div class="stat" data-stat>
-            <span class="stat-value" data-count="10">0</span>
-            <span class="stat-label">Hackathon top 10</span>
-          </div>
-          <div class="stat" data-stat>
-            <span class="stat-value" data-count="1500">0</span>
-            <span class="stat-label">Hackathon entrants beaten</span>
-          </div>
-        </div>
-      </section>
-
-      <section id="contact" class="contact section-panel" aria-labelledby="contact-title">
-        <div class="section-edge-deco" aria-hidden="true">
-          <img src="/assets/cloud-1.png" alt="" class="section-cloud section-cloud--br" loading="lazy" decoding="async" />
-        </div>
-        <p class="contact-eyebrow">Available for new projects</p>
-        <h2 id="contact-title">Let's talk.</h2>
-        <a
-          href="https://wa.me/584141809040"
-          class="contact-cta magnetic"
-          data-magnetic
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Message on WhatsApp
-        </a>
-        <p class="contact-alt">
-          <a href="mailto:juanandresliporaci@hotmail.com">juanandresliporaci@hotmail.com</a>
-        </p>
-        <div class="contact-social">
-          <a
-            href="https://www.linkedin.com/in/juan-liporaci-6610bb169/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            LinkedIn
-          </a>
-          <a
-            href="https://github.com/JuanLiporaci"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            GitHub
-          </a>
+          <ul class="socials" role="list">
+            <li><a href="https://www.linkedin.com/in/juan-liporaci-6610bb169/" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+            <li><a href="https://github.com/JuanLiporaci" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+            <li><a href="mailto:juanandresliporaci@hotmail.com">juanandresliporaci@hotmail.com</a></li>
+          </ul>
         </div>
       </section>
     </main>
 
-    <footer class="site-footer full-bleed">
+    <footer class="site-footer">
       <span>© 2026 Juan Liporaci</span>
-      <span class="footer-handle">@JUAN.LIPORACI</span>
-      <span>UNIMET · Software Engineering</span>
+      <span>Caracas, Venezuela</span>
+      <a href="#top">Back to top ↑</a>
     </footer>
 
     <script type="module" src="/src/main.ts"></script>

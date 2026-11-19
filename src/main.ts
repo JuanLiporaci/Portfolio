@@ -1,871 +1,218 @@
 import "./style.css";
-import Lenis from "lenis";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-gsap.registerPlugin(ScrollTrigger);
+const root = document.documentElement;
+root.classList.add("js");
 
-function prefersReducedMotion(): boolean {
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const mobile = matchMedia("(max-width: 768px)").matches;
+const saveData =
+  (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
+
+/* Hero intro: split the title into words that rise from a mask. Once per session. */
+function initIntro(): void {
+  const title = document.querySelector<HTMLElement>("[data-split]");
+  if (!title || reduced) return;
+  if (sessionStorageGet("intro-seen")) return;
+  sessionStorageSet("intro-seen", "1");
+
+  const words = (title.textContent ?? "").trim().split(/\s+/);
+  title.setAttribute("aria-label", title.textContent?.trim() ?? "");
+  title.textContent = "";
+  words.forEach((w, i) => {
+    const outer = document.createElement("span");
+    outer.className = "word";
+    outer.setAttribute("aria-hidden", "true");
+    const inner = document.createElement("span");
+    inner.textContent = w.replace(/ /g, " ");
+    inner.style.setProperty("--i", String(i));
+    outer.append(inner);
+    title.append(outer, document.createTextNode(" "));
+  });
+  document.querySelector(".hero")?.classList.add("intro");
 }
 
-function waitForFonts(timeoutMs = 2500): Promise<void> {
-  if (!document.fonts?.ready) return Promise.resolve();
-
-  return Promise.race([
-    document.fonts.ready.then(() => undefined),
-    new Promise<void>((resolve) => {
-      window.setTimeout(resolve, timeoutMs);
-    }),
-  ]);
-}
-
-function prepareHeroEyebrow(): void {
-  const eyebrow = document.querySelector(".hero-eyebrow");
-  if (!eyebrow || eyebrow.querySelector(".line-inner")) return;
-
-  const text = eyebrow.textContent ?? "";
-  eyebrow.textContent = "";
-  const inner = document.createElement("span");
-  inner.className = "line-inner";
-  inner.textContent = text;
-  eyebrow.appendChild(inner);
-}
-
-function setInitialAnimationStates(): void {
-  prepareHeroEyebrow();
-
-  gsap.set(".halftone-asset", { opacity: 0 });
-  gsap.set(".hand-right", { x: 60, y: -40, rotation: 4 });
-  gsap.set(".hand-left", { x: -70, y: 50, rotation: -5 });
-  gsap.set(".vertical-label", { opacity: 0 });
-  gsap.set(".hero-eyebrow .line-inner", { y: "110%" });
-  gsap.set(".title-line", { opacity: 0, y: 28 });
-  gsap.set(".hero-desc, .hero-cta", { opacity: 0, y: 20 });
-  gsap.set(".ambient-deco", { opacity: 0 });
-  gsap.set(".corner-eye", { opacity: 0 });
-}
-
-function setMobileInitialAnimationStates(): void {
-  prepareHeroEyebrow();
-
-  gsap.set(".halftone-asset", { opacity: 0 });
-  gsap.set(".hand-right", { x: 40, y: -30, rotation: 3 });
-  gsap.set(".hand-left", { x: -50, y: 35, rotation: -4 });
-  gsap.set(".vertical-label", { opacity: 0 });
-  gsap.set(".hero-eyebrow .line-inner", { y: "110%" });
-  gsap.set(".title-line", { opacity: 0, y: 28 });
-  gsap.set(".hero-desc, .hero-cta", { opacity: 0, y: 20 });
-  gsap.set(".ambient-deco", { opacity: 0 });
-  gsap.set(".corner-eye", { opacity: 0 });
-}
-
-async function initPreloader(): Promise<void> {
-  const preloader = document.querySelector<HTMLElement>("#preloader");
-  const bar = document.querySelector<HTMLElement>(".preloader-bar span");
-  const count = document.querySelector<HTMLElement>(".preloader-count");
-  const mobile = isMobileViewport();
-
-  document.body.classList.add("is-loading");
-
-  if (!preloader || !bar || !count || prefersReducedMotion()) {
-    preloader?.classList.add("is-done");
-    document.body.classList.remove("is-loading");
-    return;
+function sessionStorageGet(key: string): string | null {
+  try {
+    return sessionStorage.getItem(key);
+  } catch {
+    return null;
   }
-
-  await waitForFonts(mobile ? 1200 : 2500);
-
-  const animDuration = mobile ? 0.85 : 1.4;
-  return new Promise((resolve) => {
-    const counter = { value: 0 };
-
-    gsap.to(counter, {
-      value: 100,
-      duration: animDuration,
-      ease: "power2.inOut",
-      onUpdate: () => {
-        count.textContent = String(Math.round(counter.value));
-      },
-    });
-
-    gsap.to(bar, {
-      width: "100%",
-      duration: animDuration,
-      ease: "power2.inOut",
-      onComplete: () => {
-        gsap.to(preloader, {
-          opacity: 0,
-          duration: 0.45,
-          delay: 0.1,
-          onComplete: () => {
-            preloader.classList.add("is-done");
-            document.body.classList.remove("is-loading");
-            resolve();
-          },
-        });
-      },
-    });
-  });
 }
-
-function initSmoothScroll(): Lenis | null {
-  if (prefersReducedMotion() || isMobileViewport()) return null;
-
-  const lenis = new Lenis({
-    duration: 1.15,
-    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-    smoothWheel: true,
-  });
-
-  lenis.on("scroll", ScrollTrigger.update);
-
-  gsap.ticker.add((time) => {
-    lenis.raf(time * 1000);
-  });
-  gsap.ticker.lagSmoothing(0);
-
-  return lenis;
-}
-
-function initCursor(): void {
-  if (prefersReducedMotion() || window.matchMedia("(hover: none)").matches) {
-    return;
-  }
-
-  const dot = document.querySelector<HTMLElement>("#cursor-dot");
-  const ring = document.querySelector<HTMLElement>("#cursor-ring");
-  if (!dot || !ring) return;
-
-  gsap.set([dot, ring], { opacity: 1 });
-
-  const dotX = gsap.quickTo(dot, "x", { duration: 0.12, ease: "power3" });
-  const dotY = gsap.quickTo(dot, "y", { duration: 0.12, ease: "power3" });
-  const ringX = gsap.quickTo(ring, "x", { duration: 0.35, ease: "power3" });
-  const ringY = gsap.quickTo(ring, "y", { duration: 0.35, ease: "power3" });
-
-  window.addEventListener("mousemove", (e) => {
-    dotX(e.clientX);
-    dotY(e.clientY);
-    ringX(e.clientX);
-    ringY(e.clientY);
-  });
-
-  document.querySelectorAll("a, button, [data-magnetic]").forEach((el) => {
-    el.addEventListener("mouseenter", () => {
-      gsap.to(ring, { scale: 1.6, duration: 0.35, ease: "power3.out" });
-    });
-    el.addEventListener("mouseleave", () => {
-      gsap.to(ring, { scale: 1, duration: 0.35, ease: "power3.out" });
-    });
-  });
-}
-
-function initMagnetic(): void {
-  if (prefersReducedMotion()) return;
-
-  document.querySelectorAll<HTMLElement>("[data-magnetic]").forEach((el) => {
-    el.addEventListener("mousemove", (e) => {
-      const rect = el.getBoundingClientRect();
-      const x = e.clientX - rect.left - rect.width / 2;
-      const y = e.clientY - rect.top - rect.height / 2;
-      gsap.to(el, {
-        x: x * 0.18,
-        y: y * 0.18,
-        duration: 0.35,
-        ease: "power3.out",
-      });
-    });
-    el.addEventListener("mouseleave", () => {
-      gsap.to(el, { x: 0, y: 0, duration: 0.6, ease: "elastic.out(1, 0.5)" });
-    });
-  });
-}
-
-function isMobileViewport(): boolean {
-  return window.matchMedia("(max-width: 768px)").matches;
-}
-
-function initHeroAnimations(): void {
-  const mobile = isMobileViewport();
-  const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-
-  if (mobile) {
-    gsap.set(".hand-right", { x: 40, y: -30, rotation: 3 });
-    gsap.set(".hand-left", { x: -50, y: 35, rotation: -4 });
-
-    tl.to(".halftone-asset", { opacity: 1, duration: 1.2, stagger: 0.15 }, 0);
-    tl.to(".hand-right", { x: 0, y: 0, rotation: 0, duration: 1.3 }, 0.1);
-    tl.to(".hand-left", { x: 0, y: 0, rotation: 0, duration: 1.3 }, 0.1);
-  } else {
-    gsap.set(".hand-right", { x: 60, y: -40, rotation: 4 });
-    gsap.set(".hand-left", { x: -70, y: 50, rotation: -5 });
-
-    tl.to(".halftone-asset", { opacity: 1, duration: 1.2, stagger: 0.15 }, 0);
-    tl.to(".hand-right", { x: 0, y: 0, rotation: 0, duration: 1.5 }, 0.1);
-    tl.to(".hand-left", { x: 0, y: 0, rotation: 0, duration: 1.5 }, 0.1);
-  }
-
-  tl.to(".vertical-label", { opacity: 1, duration: 0.8 }, mobile ? 0 : 0.35);
-  tl.to(".hero-eyebrow .line-inner", { y: 0, duration: 0.85 }, 0.45);
-  tl.to(
-    ".title-line",
-    { opacity: 1, y: 0, duration: 0.75, stagger: 0.12 },
-    0.5,
-  );
-  tl.to(
-    ".hero-desc, .hero-cta",
-    { opacity: 1, y: 0, duration: 0.7, stagger: 0.1 },
-    0.75,
-  );
-
-  if (!prefersReducedMotion() && !mobile) {
-    gsap.to(".hand-right", {
-      y: -30,
-      x: 12,
-      ease: "none",
-      scrollTrigger: {
-        trigger: ".hero",
-        start: "top top",
-        end: "bottom top",
-        scrub: 1.4,
-      },
-    });
-    gsap.to(".hand-left", {
-      y: 40,
-      x: -18,
-      ease: "none",
-      scrollTrigger: {
-        trigger: ".hero",
-        start: "top top",
-        end: "bottom top",
-        scrub: 1.4,
-      },
-    });
+function sessionStorageSet(key: string, value: string): void {
+  try {
+    sessionStorage.setItem(key, value);
+  } catch {
+    /* private mode */
   }
 }
 
-function initCloudDrift(mobile: boolean): void {
-  const amp = mobile ? 0.6 : 1;
-  const dur = mobile ? 1.2 : 1;
+/* Sky video: load after first paint, play only while the hero is visible. */
+function initSky(): void {
+  const video = document.querySelector<HTMLVideoElement>(".sky-video");
+  const hero = document.querySelector<HTMLElement>(".hero");
+  if (!video || !hero || reduced || saveData) return;
 
-  const drifts: Array<{
-    target: string;
-    x: number;
-    y: number;
-    duration: number;
-    delay?: number;
-  }> = [
-    { target: ".cloud-a", x: 45, y: -18, duration: 16 },
-    { target: ".cloud-b", x: -50, y: 18, duration: 20 },
-    { target: ".cloud-c", x: 35, y: -22, duration: 18 },
-    { target: ".cloud-d", x: 28, y: 16, duration: 17 },
-    { target: ".cloud-e", x: -32, y: -14, duration: 19 },
-    { target: ".cloud-f", x: 40, y: 20, duration: 21 },
-  ];
+  const src = mobile ? video.dataset.srcMobile : video.dataset.srcDesktop;
+  if (!src) return;
 
-  drifts.forEach(({ target, x, y, duration, delay = 0 }) => {
-    gsap.to(target, {
-      x: x * amp,
-      y: y * amp,
-      duration: duration * dur,
-      repeat: -1,
-      yoyo: true,
-      ease: "sine.inOut",
-      delay,
-    });
-  });
-}
-
-function initAmbientVideo(video: HTMLVideoElement, mobile: boolean): void {
-  video.pause();
-  video.muted = true;
-  video.playsInline = true;
-
-  if (mobile) {
-    video.removeAttribute("src");
-    video.load();
-    return;
-  }
-
-  const src = video.dataset.desktopSrc ?? "/assets/sky-video.mp4";
-  const source = video.querySelector<HTMLSourceElement>("source");
-
-  if (source) source.src = src;
-  else video.src = src;
-
-  video.load();
-
-  const targetOpacity = 0.62;
-
-  const revealVideo = (): void => {
-    gsap.to(video, {
-      opacity: targetOpacity,
-      duration: 1.2,
-      ease: "power2.out",
-    });
-  };
-
-  const bindVideoScrub = (): void => {
-    if (!video.duration || !Number.isFinite(video.duration)) return;
-
-    video.currentTime = 0;
-
-    ScrollTrigger.create({
-      trigger: "main",
-      start: "top top",
-      end: "bottom bottom",
-      scrub: 0.65,
-      onUpdate: (self) => {
-        video.currentTime = Math.min(
-          self.progress * video.duration,
-          video.duration - 0.08,
-        );
-      },
-    });
-  };
-
-  if (video.readyState >= 1) {
-    revealVideo();
-    bindVideoScrub();
-  } else {
+  const start = (): void => {
+    video.src = src;
     video.addEventListener(
-      "loadedmetadata",
-      () => {
-        revealVideo();
-        bindVideoScrub();
-      },
+      "playing",
+      () => video.classList.add("is-playing"),
       { once: true },
     );
-  }
-}
-
-function finalizeMobileAmbient(): void {
-  document.querySelector<HTMLElement>("#ambient-bg")?.classList.add("is-ready");
-}
-
-function initAmbientScene(): void {
-  const video = document.querySelector<HTMLVideoElement>("#sky-video");
-  const decos = document.querySelectorAll<HTMLElement>(".ambient-deco");
-  const reduced = prefersReducedMotion();
-  const mobile = isMobileViewport();
-
-  if (reduced) {
-    gsap.set(decos, { opacity: 0.4 });
-    initCornerEyes();
-    if (video) {
-      video.playbackRate = 0.35;
-      void video.play().catch(() => {});
-    }
-    return;
-  }
-
-  const decoOpacity = mobile ? 0.45 : 0.72;
-
-  if (mobile) {
-    document.documentElement.classList.add("mobile-ambient-css");
-
-    gsap.to(decos, {
-      opacity: decoOpacity,
-      duration: 1.1,
-      stagger: 0.07,
-      delay: 0.25,
-      ease: "power2.out",
-      onComplete: finalizeMobileAmbient,
-    });
-
-    if (video) {
-      initAmbientVideo(video, true);
-    }
-
-    initCornerEyes();
-    return;
-  }
-
-  gsap.to(decos, {
-    opacity: decoOpacity,
-    duration: 1.8,
-    stagger: 0.1,
-    delay: 0.6,
-    ease: "power2.out",
-  });
-
-  initCloudDrift(false);
-
-  gsap.to(".butterfly", {
-    y: -35,
-    x: 25,
-    rotation: 10,
-    duration: 2.8,
-    repeat: -1,
-    yoyo: true,
-    ease: "sine.inOut",
-  });
-
-  decos.forEach((el) => {
-    const depth = Number.parseFloat(el.dataset.depth ?? "0.3");
-    gsap.to(el, {
-      y: () => window.innerHeight * depth * 1.35,
-      ease: "none",
-      scrollTrigger: {
-        trigger: "main",
-        start: "top top",
-        end: "bottom bottom",
-        scrub: 1.2 + depth * 2.5,
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !document.hidden) void video.play().catch(() => {});
+        else video.pause();
       },
-    });
-  });
-
-  gsap.to(".edge-cloud-left", {
-    x: 70,
-    ease: "none",
-    scrollTrigger: {
-      trigger: "main",
-      start: "top top",
-      end: "bottom bottom",
-      scrub: 1.4,
-    },
-  });
-
-  gsap.to(".edge-cloud-right", {
-    x: -55,
-    ease: "none",
-    scrollTrigger: {
-      trigger: "main",
-      start: "top top",
-      end: "bottom bottom",
-      scrub: 1.1,
-    },
-  });
-
-  initCornerEyes();
-
-  if (video) {
-    initAmbientVideo(video, false);
-  }
-}
-
-function initCornerEyes(): void {
-  const eyes = document.querySelectorAll<HTMLElement>(".corner-eye");
-  if (!eyes.length) return;
-
-  if (prefersReducedMotion()) {
-    gsap.set(eyes, { opacity: 0.12 });
-    return;
-  }
-
-  const mobile = isMobileViewport();
-  const targetOpacity = mobile ? 0.12 : 0.14;
-
-  gsap.to(eyes, {
-    opacity: targetOpacity,
-    duration: 1.4,
-    stagger: 0.2,
-    delay: mobile ? 0.5 : 1.2,
-    ease: "power2.out",
-  });
-
-  gsap.to(".corner-eye--tl", {
-    y: mobile ? -3 : -6,
-    x: mobile ? 2 : 4,
-    rotation: mobile ? -2 : -4,
-    duration: mobile ? 7 : 5,
-    repeat: -1,
-    yoyo: true,
-    ease: "sine.inOut",
-  });
-
-  if (mobile) return;
-
-  gsap.to(".corner-eye--br", {
-    y: 8,
-    x: -5,
-    rotation: 6,
-    duration: 6.5,
-    repeat: -1,
-    yoyo: true,
-    ease: "sine.inOut",
-    delay: 0.8,
-  });
-}
-
-function initSectionEdges(): void {
-  if (prefersReducedMotion()) return;
-
-  const mobile = isMobileViewport();
-
-  gsap.utils.toArray<HTMLElement>(".section-cloud").forEach((cloud) => {
-    gsap.fromTo(
-      cloud,
-      { x: mobile ? -18 : -30, opacity: 0.15 },
-      {
-        x: mobile ? 10 : 20,
-        opacity: mobile ? 0.4 : 0.45,
-        duration: mobile ? 0.95 : 1.2,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: cloud.closest("section") ?? cloud,
-          start: "top 90%",
-          toggleActions: "play none none reverse",
-        },
-      },
+      { threshold: 0.05 },
     );
-  });
-
-  const sectionButterfly = document.querySelector<HTMLElement>(".section-butterfly");
-  if (!sectionButterfly) return;
-
-  gsap.fromTo(
-    sectionButterfly,
-    { x: mobile ? 24 : 40, y: -14, rotation: -8, opacity: 0 },
-    {
-      x: 0,
-      y: 0,
-      rotation: 0,
-      opacity: mobile ? 0.4 : 0.45,
-      duration: mobile ? 1.1 : 1.4,
-      ease: "power3.out",
-      scrollTrigger: {
-        trigger: sectionButterfly.closest("section") ?? sectionButterfly,
-        start: "top 85%",
-        toggleActions: "play none none reverse",
-      },
-    },
-  );
-
-  gsap.to(sectionButterfly, {
-    y: mobile ? -10 : -18,
-    rotation: mobile ? 5 : 8,
-    duration: mobile ? 2.8 : 2.5,
-    repeat: -1,
-    yoyo: true,
-    ease: "sine.inOut",
-  });
-}
-
-function initServiceList(): void {
-  document.querySelectorAll<HTMLElement>("[data-service]").forEach((row, i) => {
-    const line = row.querySelector<HTMLElement>(".service-line");
-    const trigger = row.querySelector<HTMLButtonElement>(".service-trigger");
-    const panel = row.querySelector<HTMLElement>(".service-panel");
-
-    if (line) {
-      gsap.to(line, {
-        scaleX: 1,
-        duration: 0.85,
-        delay: 0.8 + i * 0.1,
-        ease: "power3.inOut",
-      });
-    }
-
-    if (!trigger || !panel) return;
-
-    trigger.addEventListener("click", () => {
-      const willOpen = !row.classList.contains("is-active");
-
-      document.querySelectorAll<HTMLElement>("[data-service].is-active").forEach((openRow) => {
-        if (openRow === row) return;
-        openRow.classList.remove("is-active");
-        openRow.querySelector(".service-trigger")?.setAttribute("aria-expanded", "false");
-      });
-
-      row.classList.toggle("is-active", willOpen);
-      trigger.setAttribute("aria-expanded", String(willOpen));
+    io.observe(hero);
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) video.pause();
     });
-  });
+  };
+
+  if ("requestIdleCallback" in window) {
+    requestIdleCallback(start, { timeout: 1500 });
+  } else {
+    setTimeout(start, 600);
+  }
 }
 
-function initMarquee(): void {
-  const inner = document.querySelector<HTMLElement>(".marquee-inner");
-  if (!inner || prefersReducedMotion()) return;
+/* Hands drift with scroll: transform only, one rAF, only while the hero is on screen. */
+function initParallax(): void {
+  if (reduced || mobile) return;
+  const items = [...document.querySelectorAll<HTMLElement>("[data-parallax]")];
+  const hero = document.querySelector<HTMLElement>(".hero");
+  if (!items.length || !hero) return;
 
-  const width = inner.scrollWidth / 2;
+  let visible = true;
+  let ticking = false;
+  new IntersectionObserver(([e]) => {
+    visible = e.isIntersecting;
+  }).observe(hero);
 
-  gsap.to(inner, {
-    x: -width,
-    duration: 32,
-    ease: "none",
-    repeat: -1,
-  });
-}
-
-function initExperienceList(): void {
-  const mobile = isMobileViewport();
-
-  document.querySelectorAll<HTMLElement>("[data-experience]").forEach((item, i) => {
-    const line = item.querySelector<HTMLElement>(".experience-line");
-    if (line) {
-      gsap.to(line, {
-        scaleX: 1,
-        duration: mobile ? 0.75 : 0.9,
-        ease: "power3.inOut",
-        delay: mobile ? 0 : i * 0.08,
-        scrollTrigger: {
-          trigger: item,
-          start: "top 88%",
-          toggleActions: "play none none none",
-        },
-      });
-    }
-
-    gsap.from(item, {
-      y: mobile ? 22 : 36,
-      opacity: 0,
-      duration: mobile ? 0.65 : 0.75,
-      ease: "power3.out",
-      scrollTrigger: {
-        trigger: item,
-        start: "top 88%",
-        toggleActions: "play none none none",
-      },
+  const update = (): void => {
+    ticking = false;
+    const y = scrollY;
+    items.forEach((el) => {
+      const k = Number(el.dataset.parallax ?? 0);
+      el.style.transform = `translate3d(0, ${(y * k).toFixed(1)}px, 0)`;
     });
-  });
-}
-
-function initWorkCards(): void {
-  const scroll = document.querySelector<HTMLElement>(".work-scroll");
-  const cards = gsap.utils.toArray<HTMLElement>("[data-project]");
-  if (!scroll || !cards.length || prefersReducedMotion()) return;
-
-  const mobile = isMobileViewport();
-
-  gsap.set(cards, { opacity: 1, x: 0, clearProps: "transform" });
-
-  gsap.fromTo(
-    cards,
-    { opacity: 0, x: mobile ? 24 : 40 },
-    {
-      opacity: 1,
-      x: 0,
-      duration: mobile ? 0.65 : 0.8,
-      stagger: mobile ? 0.05 : 0.07,
-      ease: "power3.out",
-      scrollTrigger: {
-        trigger: scroll,
-        start: "top 88%",
-        toggleActions: "play none none none",
-        once: true,
-      },
-    },
-  );
-}
-
-function getWorkScrollMax(scroll: HTMLElement): number {
-  const lastCard = scroll.querySelector<HTMLElement>(".work-card:last-child");
-  if (!lastCard) return 0;
-
-  const scrollRect = scroll.getBoundingClientRect();
-  const lastRect = lastCard.getBoundingClientRect();
-  return Math.max(0, scroll.scrollLeft + (lastRect.right - scrollRect.right));
-}
-
-function clampWorkScroll(scroll: HTMLElement): void {
-  const max = getWorkScrollMax(scroll);
-  if (scroll.scrollLeft > max) scroll.scrollLeft = max;
-  if (scroll.scrollLeft < 0) scroll.scrollLeft = 0;
-}
-
-function initWorkHorizontalScroll(): void {
-  const workScroll = document.querySelector<HTMLElement>("[data-horizontal-scroll]");
-  if (!workScroll) return;
-
-  const clamp = (): void => clampWorkScroll(workScroll);
-
-  clamp();
-  workScroll.addEventListener("scroll", clamp, { passive: true });
-  window.addEventListener("resize", clamp, { passive: true });
-
-  let isDragging = false;
-  let startX = 0;
-  let scrollStart = 0;
-  let moved = false;
-
-  workScroll.addEventListener(
-    "pointerdown",
-    (event) => {
-      if (event.pointerType !== "mouse") return;
-      if (event.button !== 0) return;
-      if ((event.target as HTMLElement).closest("a, button")) return;
-
-      isDragging = true;
-      moved = false;
-      startX = event.clientX;
-      scrollStart = workScroll.scrollLeft;
-      workScroll.setPointerCapture(event.pointerId);
-      workScroll.classList.add("is-dragging");
+  };
+  addEventListener(
+    "scroll",
+    () => {
+      if (!visible || ticking) return;
+      ticking = true;
+      requestAnimationFrame(update);
     },
     { passive: true },
   );
+}
 
-  workScroll.addEventListener(
-    "pointermove",
-    (event) => {
-      if (!isDragging) return;
-
-      const delta = event.clientX - startX;
-      if (Math.abs(delta) > 4) moved = true;
-      if (!moved) return;
-
-      event.preventDefault();
-      const max = getWorkScrollMax(workScroll);
-      workScroll.scrollLeft = Math.min(Math.max(0, scrollStart - delta), max);
+/* Reveal on scroll with a small stagger for siblings that enter together. */
+function initReveals(): void {
+  const els = document.querySelectorAll<HTMLElement>("[data-reveal]");
+  if (reduced || !("IntersectionObserver" in window)) {
+    els.forEach((el) => el.classList.add("is-in"));
+    return;
+  }
+  const io = new IntersectionObserver(
+    (entries) => {
+      let n = 0;
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const el = entry.target as HTMLElement;
+        el.style.setProperty("--d", String(Math.min(n, 4) * 60));
+        el.classList.add("is-in");
+        io.unobserve(el);
+        n++;
+      });
     },
-    { passive: false },
+    { rootMargin: "0px 0px -8% 0px", threshold: 0.08 },
   );
+  els.forEach((el) => io.observe(el));
+}
 
-  const endDrag = (event: PointerEvent): void => {
-    if (!isDragging) return;
-    isDragging = false;
-    clampWorkScroll(workScroll);
-    workScroll.classList.remove("is-dragging");
+/* Header gets a surface once you leave the top. */
+function initHeader(): void {
+  const header = document.querySelector<HTMLElement>("[data-header]");
+  const hero = document.querySelector<HTMLElement>(".hero-copy");
+  if (!header || !hero) return;
+  new IntersectionObserver(
+    ([e]) => header.classList.toggle("is-scrolled", !e.isIntersecting),
+    { rootMargin: "-80px 0px 0px 0px" },
+  ).observe(hero);
+}
 
-    if (workScroll.hasPointerCapture(event.pointerId)) {
-      workScroll.releasePointerCapture(event.pointerId);
-    }
+function initMenu(): void {
+  const toggle = document.querySelector<HTMLButtonElement>(".menu-toggle");
+  const drawer = document.querySelector<HTMLElement>("#drawer");
+  if (!toggle || !drawer) return;
+  const set = (open: boolean): void => {
+    toggle.setAttribute("aria-expanded", String(open));
+    drawer.hidden = !open;
+  };
+  toggle.addEventListener("click", () => set(drawer.hidden));
+  drawer.addEventListener("click", (e) => {
+    if ((e.target as HTMLElement).closest("a")) set(false);
+  });
+  addEventListener("keydown", (e) => {
+    if (e.key === "Escape") set(false);
+  });
+}
+
+/* Work filter: sliding pill + View Transitions when the browser has them. */
+function initFilters(): void {
+  const bar = document.querySelector<HTMLElement>("[data-filters]");
+  const grid = document.querySelector<HTMLElement>("[data-grid]");
+  if (!bar || !grid) return;
+  const pill = bar.querySelector<HTMLElement>(".filters-pill");
+  const buttons = [...bar.querySelectorAll<HTMLButtonElement>("button[data-filter]")];
+  const cards = [...grid.querySelectorAll<HTMLElement>(".card")];
+  cards.forEach((c, i) => (c.style.viewTransitionName = `card-${i}`));
+
+  const movePill = (btn: HTMLButtonElement): void => {
+    if (!pill) return;
+    pill.style.width = `${btn.offsetWidth}px`;
+    pill.style.height = `${btn.offsetHeight}px`;
+    pill.style.translate = `${btn.offsetLeft}px ${btn.offsetTop}px`;
   };
 
-  workScroll.addEventListener("pointerup", endDrag);
-  workScroll.addEventListener("pointercancel", endDrag);
-  workScroll.addEventListener("lostpointercapture", () => {
-    isDragging = false;
-    workScroll.classList.remove("is-dragging");
-  });
-}
-
-function initScrollReveals(): void {
-  if (prefersReducedMotion()) return;
-
-  const mobile = isMobileViewport();
-
-  gsap.utils.toArray<HTMLElement>(".section-head").forEach((el) => {
-    gsap.from(el.children, {
-      y: mobile ? 22 : 32,
-      opacity: 0,
-      duration: mobile ? 0.65 : 0.8,
-      stagger: 0.08,
-      ease: "power3.out",
-      scrollTrigger: {
-        trigger: el,
-        start: "top 88%",
-        toggleActions: "play none none none",
-      },
+  const apply = (filter: string): void => {
+    cards.forEach((c) => {
+      const show = filter === "all" || c.dataset.cat === filter;
+      c.hidden = !show;
+      if (show) c.classList.add("is-in");
     });
-  });
+  };
+
+  buttons.forEach((btn) =>
+    btn.addEventListener("click", () => {
+      buttons.forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
+      movePill(btn);
+      const filter = btn.dataset.filter ?? "all";
+      const doc = document as Document & { startViewTransition?: (cb: () => void) => unknown };
+      if (doc.startViewTransition && !reduced) doc.startViewTransition(() => apply(filter));
+      else apply(filter);
+    }),
+  );
+
+  const current = (): HTMLButtonElement =>
+    buttons.find((b) => b.getAttribute("aria-pressed") === "true") ?? buttons[0];
+  requestAnimationFrame(() => movePill(current()));
+  addEventListener("resize", () => movePill(current()), { passive: true });
+  document.fonts?.ready.then(() => movePill(current()));
 }
 
-function initStats(): void {
-  document.querySelectorAll<HTMLElement>("[data-stat]").forEach((stat) => {
-    const valueEl = stat.querySelector<HTMLElement>("[data-count]");
-    if (!valueEl) return;
-
-    const target = Number(valueEl.dataset.count ?? 0);
-    const counter = { value: 0 };
-
-    ScrollTrigger.create({
-      trigger: stat,
-      start: "top 85%",
-      once: true,
-      onEnter: () => {
-        gsap.to(counter, {
-          value: target,
-          duration: 1.6,
-          ease: "power2.out",
-          onUpdate: () => {
-            valueEl.textContent = String(Math.round(counter.value));
-          },
-        });
-      },
-    });
-  });
-}
-
-function initNav(): void {
-  document.querySelectorAll<HTMLAnchorElement>('a[href^="#"]').forEach((link) => {
-    link.addEventListener("click", (e) => {
-      const href = link.getAttribute("href");
-      if (!href || href === "#") return;
-      const target = document.querySelector(href);
-      if (!target) return;
-      e.preventDefault();
-      target.scrollIntoView({ behavior: "smooth", block: "start" });
-      closeMobileMenu();
-    });
-  });
-
-  const toggle = document.querySelector<HTMLButtonElement>(".menu-toggle");
-  const drawer = document.querySelector<HTMLElement>(".mobile-drawer");
-
-  toggle?.addEventListener("click", () => {
-    const isOpen = drawer?.classList.toggle("is-open");
-    toggle.setAttribute("aria-expanded", String(isOpen));
-    if (drawer) drawer.hidden = !isOpen;
-  });
-}
-
-function closeMobileMenu(): void {
-  const toggle = document.querySelector<HTMLButtonElement>(".menu-toggle");
-  const drawer = document.querySelector<HTMLElement>(".mobile-drawer");
-  drawer?.classList.remove("is-open");
-  if (drawer) drawer.hidden = true;
-  toggle?.setAttribute("aria-expanded", "false");
-}
-
-async function bootstrap(): Promise<void> {
-  const reduced = prefersReducedMotion();
-  const mobile = isMobileViewport();
-
-  if (mobile) {
-    ScrollTrigger.config({
-      ignoreMobileResize: true,
-      limitCallbacks: true,
-    });
-  }
-
-  if (reduced) {
-    prepareHeroEyebrow();
-  } else if (mobile) {
-    setMobileInitialAnimationStates();
-  } else {
-    setInitialAnimationStates();
-  }
-
-  await initPreloader();
-
-  const lenis = initSmoothScroll();
-  lenis?.scrollTo(0, { immediate: true });
-
-  initCursor();
-  initMagnetic();
-  initAmbientScene();
-
-  if (reduced) {
-    gsap.set(
-      ".title-line, .hero-desc, .hero-cta, .halftone-asset, .vertical-label, .ambient-deco, .corner-eye",
-      { clearProps: "all" },
-    );
-    gsap.set("#sky-video", { opacity: 0.62 });
-  } else {
-    initHeroAnimations();
-  }
-
-  initServiceList();
-  initMarquee();
-  initWorkCards();
-  initWorkHorizontalScroll();
-  initExperienceList();
-  initScrollReveals();
-  initSectionEdges();
-  initStats();
-  initNav();
-
-  ScrollTrigger.refresh();
-  requestAnimationFrame(() => ScrollTrigger.refresh());
-}
-
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () => {
-    void bootstrap();
-  });
-} else {
-  void bootstrap();
-}
+initIntro();
+initReveals();
+initHeader();
+initMenu();
+initFilters();
+initParallax();
+initSky();
