@@ -99,8 +99,31 @@ button {
 }
 
 ::selection {
-  background: var(--ink);
-  color: var(--sky);
+  background: rgb(107 30 42 / 0.16);
+  color: var(--ink);
+}
+
+/* Clicking and dragging on links, buttons or images must not select text or start a native drag
+   (a native drag freezes pointer events and leaves the custom cursor ring behind). */
+a,
+img,
+button,
+summary {
+  -webkit-user-drag: none;
+}
+.btn,
+.chip-link,
+.site-nav,
+.socials,
+.filters,
+.card-cta,
+.logo,
+summary,
+.hand,
+.butterfly,
+.contact-hand {
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .skip {

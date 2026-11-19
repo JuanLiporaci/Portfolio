@@ -109,23 +109,36 @@ function initCursor(): void {
     else running = false;
   };
 
-  addEventListener(
-    "pointermove",
-    (e) => {
-      if (e.pointerType !== "mouse") return;
-      mx = e.clientX;
-      my = e.clientY;
-      wrap.classList.remove("is-hidden");
-      if (!running) {
-        running = true;
-        requestAnimationFrame(loop);
-      }
-    },
-    { passive: true },
-  );
-  document.addEventListener("pointerleave", () => wrap.classList.add("is-hidden"));
-  addEventListener("pointerdown", () => wrap.classList.add("is-down"));
-  addEventListener("pointerup", () => wrap.classList.remove("is-down"));
+  const follow = (x: number, y: number): void => {
+    if (!x && !y) return;
+    mx = x;
+    my = y;
+    wrap.classList.remove("is-hidden");
+    if (!running) {
+      running = true;
+      requestAnimationFrame(loop);
+    }
+  };
+  const release = (): void => wrap.classList.remove("is-down");
+
+  // mousemove keeps firing during text selection and after a cancelled pointer stream
+  addEventListener("mousemove", (e) => follow(e.clientX, e.clientY), { passive: true });
+  addEventListener("pointerdown", (e) => {
+    if (e.pointerType !== "mouse") return;
+    follow(e.clientX, e.clientY);
+    wrap.classList.add("is-down");
+  });
+  addEventListener("pointerup", release);
+  addEventListener("pointercancel", release);
+  addEventListener("blur", release);
+  // if a native drag still starts, keep following it and cancel it on links/images
+  addEventListener("dragstart", (e) => {
+    if ((e.target as HTMLElement).closest?.("a, img")) e.preventDefault();
+  });
+  addEventListener("drag", (e) => follow(e.clientX, e.clientY));
+  addEventListener("dragend", release);
+  document.addEventListener("mouseleave", () => wrap.classList.add("is-hidden"));
+  document.querySelectorAll("img, a").forEach((el) => el.setAttribute("draggable", "false"));
 
   document.addEventListener("pointerover", (e) => {
     const t = e.target as HTMLElement;
